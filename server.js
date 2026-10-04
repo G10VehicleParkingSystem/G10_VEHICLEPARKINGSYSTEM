@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 
 const reservationRoutes = require("./src/modules/reservation/reservation.routes");
 const notificationRoutes = require("./src/modules/notification/notification.routes");
+const analyticsRoutes = require("./src/modules/analytics/analytics.routes");
 
 const app = express();
 
@@ -21,8 +22,9 @@ app.get("/api/health", (req, res) => {
 
 app.use("/api/reservations", reservationRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/analytics", analyticsRoutes);
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 const MONGO_URI =
   process.env.MONGO_URI ||
   "mongodb://127.0.0.1:27017/g10_vehicle_parking";
