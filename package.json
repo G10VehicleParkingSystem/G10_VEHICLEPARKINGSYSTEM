@@ -1,11 +1,12 @@
 {
-  "name": "g10-fr2-fr7-backend",
+  "name": "g10-parking-backend",
   "version": "1.0.0",
-  "description": "Isolated FR-2 Reservation and FR-7 Notification modules for G10 Vehicle Parking System",
+  "description": "FR-2, FR-3, FR-5 and FR-7 backend modules for G10 Vehicle Parking System",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node --watch server.js"
+    "dev": "node --watch server.js",
+    "test": "node --test"
   },
   "dependencies": {
     "cors": "^2.8.5",
