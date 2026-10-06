@@ -9,8 +9,14 @@ const notificationRoutes = require("./src/modules/notification/notification.rout
 const paymentRoutes = require("./src/modules/payment/payment.routes");
 const overstayRoutes = require("./src/modules/overstay/overstay.routes");
 const overstayService = require("./src/modules/overstay/overstay.service");
+const analyticsRoutes = require("./src/modules/analytics/analytics.routes");
+const vehicleRoutes = require("./src/modules/vehicle/vehicle.routes");
+const slotRoutes = require("./src/modules/slot/slot.routes");
+const parkingRoutes = require("./src/modules/parking/parking.routes");
+
 
 const app = express();
+
 
 app.use(cors());
 app.use(express.json());
@@ -26,6 +32,11 @@ app.use("/api/reservations", reservationRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/overstays", overstayRoutes);
+app.use("/api/analytics", analyticsRoutes);
+app.use("/api/vehicles", vehicleRoutes);
+app.use("/api/slots", slotRoutes);
+app.use("/api/parking", parkingRoutes);
+
 
 const PORT = process.env.PORT || 5000;
 const MONGO_URI =
