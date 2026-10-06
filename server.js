@@ -7,8 +7,12 @@ const mongoose = require("mongoose");
 const reservationRoutes = require("./src/modules/reservation/reservation.routes");
 const notificationRoutes = require("./src/modules/notification/notification.routes");
 const analyticsRoutes = require("./src/modules/analytics/analytics.routes");
+const vehicleRoutes = require("./src/modules/vehicle/vehicle.routes");
+const slotRoutes = require("./src/modules/slot/slot.routes");
+const parkingRoutes = require("./src/modules/parking/parking.routes");
 
 const app = express();
+
 
 app.use(cors());
 app.use(express.json());
@@ -23,6 +27,9 @@ app.get("/api/health", (req, res) => {
 app.use("/api/reservations", reservationRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/analytics", analyticsRoutes);
+app.use("/api/vehicles", vehicleRoutes);
+app.use("/api/slots", slotRoutes);
+app.use("/api/parking", parkingRoutes);
 
 const PORT = process.env.PORT || 5001;
 const MONGO_URI =
