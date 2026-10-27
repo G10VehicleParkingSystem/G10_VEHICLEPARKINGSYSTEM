@@ -18,8 +18,31 @@ function validatePaymentMethod(paymentMethod) {
   }
 }
 
+async function recordFailedPayment({ userId, paymentMethod, amount, target }) {
+  const payment = await Payment.create({
+    userId,
+    ...target,
+    amount,
+    currency: "INR",
+    paymentMethod,
+    status: "FAILED",
+    transactionId: `TXN-${randomUUID()}`,
+    providerReference: "NOT_PROCESSED"
+  });
+
+  await notificationService.notifyPaymentStatus(userId, payment._id, false);
+  return payment;
+}
+
 async function recordPayment({ userId, paymentMethod, amount, target }) {
-  const gatewayResult = await processDigitalPayment({ amount, paymentMethod });
+  let gatewayResult;
+  try {
+    gatewayResult = await processDigitalPayment({ amount, paymentMethod });
+  } catch (error) {
+    await recordFailedPayment({ userId, paymentMethod, amount, target });
+    throw new Error(`Payment failed: ${error.message}`);
+  }
+
   const payment = await Payment.create({
     userId,
     ...target,
@@ -32,7 +55,11 @@ async function recordPayment({ userId, paymentMethod, amount, target }) {
     providerReference: gatewayResult.providerReference
   });
 
-  await notificationService.notifyPaymentStatus(userId, payment._id, true);
+  await notificationService.notifyPaymentStatus(
+    userId,
+    payment._id,
+    payment.status === "SUCCESS"
+  );
   return payment;
 }
 
