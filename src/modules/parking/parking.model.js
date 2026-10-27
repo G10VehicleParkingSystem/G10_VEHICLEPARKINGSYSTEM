@@ -2,6 +2,17 @@ const mongoose = require("mongoose");
 
 const parkingSessionSchema = new mongoose.Schema(
   {
+    reservationId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Reservation",
+      default: null
+    },
+
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      default: null
+    },
+
     vehicleId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Vehicle",

@@ -1,4 +1,9 @@
+const mongoose = require("mongoose");
 const Reservation = require("./reservation.model");
+const Vehicle = require("../vehicle/vehicle.model");
+const ParkingSlot = require("../slot/slot.model");
+const notificationService = require("../notification/notification.service");
+const { vehicleFitsSlot } = require("../slot/slot.service");
 
 async function checkSlotAvailability(slotId, startTime, endTime) {
   const overlappingReservation = await Reservation.findOne({
@@ -21,6 +26,12 @@ async function createReservation({
   const start = new Date(startTime);
   const end = new Date(endTime);
 
+  for (const [name, value] of Object.entries({ userId, vehicleId, slotId })) {
+    if (!mongoose.isValidObjectId(value)) {
+      throw new Error(`${name} is not a valid id`);
+    }
+  }
+
   if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
     throw new Error("Invalid reservation time");
   }
@@ -33,6 +44,23 @@ async function createReservation({
     throw new Error("Reservation cannot start in the past");
   }
 
+  const [vehicle, slot] = await Promise.all([
+    Vehicle.findById(vehicleId),
+    ParkingSlot.findById(slotId)
+  ]);
+
+  if (!vehicle) {
+    throw new Error("Vehicle not found");
+  }
+
+  if (!slot) {
+    throw new Error("Parking slot not found");
+  }
+
+  if (!vehicleFitsSlot(vehicle, slot)) {
+    throw new Error("Vehicle does not fit the selected parking slot");
+  }
+
   const available = await checkSlotAvailability(slotId, start, end);
 
   if (!available) {
@@ -41,7 +69,7 @@ async function createReservation({
     );
   }
 
-  return Reservation.create({
+  const reservation = await Reservation.create({
     userId,
     vehicleId,
     slotId,
@@ -49,6 +77,13 @@ async function createReservation({
     endTime: end,
     status: "CONFIRMED"
   });
+
+  await notificationService.notifyReservationConfirmed(
+    userId,
+    reservation._id
+  );
+
+  return reservation;
 }
 
 async function getUserReservations(userId) {
