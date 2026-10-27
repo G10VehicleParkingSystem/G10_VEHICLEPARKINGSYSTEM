@@ -2,9 +2,9 @@ name: Backend CI
 
 on:
   push:
-    branches: [main, feature/fr2-fr7-final]
+    branches: ["**"]
   pull_request:
-    branches: [main]
+  workflow_dispatch:
 
 jobs:
   backend-check:
