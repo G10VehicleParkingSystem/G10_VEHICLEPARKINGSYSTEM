@@ -3,7 +3,7 @@
 **Project:** G10 Vehicle Parking System
 **Sprint 1:** 19-Oct-2026 to 23-Oct-2026 (backlog dry run 12-16 Oct)
 **Tracking:** [GitHub Project - Sprint Planning](https://github.com/orgs/G10VehicleParkingSystem/projects/2)
-**Demo video:** [`SE_sprint1.mp4`](../SE_sprint1.mp4)
+**Demo videos:** [`SE_sprint1.mp4`](../SE_sprint1.mp4) (recorded 23 Oct) and [`SE_sprint1_demo_all_FRs.mp4`](../SE_sprint1_demo_all_FRs.mp4) (all seven FRs end to end on the integrated backend, 28 Oct)
 
 ## Sprint goal
 
