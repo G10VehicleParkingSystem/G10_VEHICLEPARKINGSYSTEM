@@ -1,12 +1,12 @@
 {
   "name": "g10-parking-backend",
   "version": "1.0.0",
-  "description": "FR-2, FR-3, FR-5 and FR-7 backend modules for G10 Vehicle Parking System",
+  "description": "Backend for the G10 Vehicle Parking System (FR-1 to FR-7)",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "test": "node --test"
+    "test": "node --test tests/*.test.js"
   },
   "dependencies": {
     "cors": "^2.8.5",

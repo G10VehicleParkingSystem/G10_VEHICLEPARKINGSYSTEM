@@ -11,6 +11,11 @@ const overstayFineSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       required: true
     },
+    sessionId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ParkingSession",
+      default: null
+    },
     overdueMinutes: {
       type: Number,
       required: true,

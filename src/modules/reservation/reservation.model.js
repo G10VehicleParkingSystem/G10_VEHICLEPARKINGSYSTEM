@@ -26,6 +26,14 @@ const reservationSchema = new mongoose.Schema(
       type: String,
       enum: ["CONFIRMED", "CANCELLED", "COMPLETED"],
       default: "CONFIRMED"
+    },
+    upcomingNotifiedAt: {
+      type: Date,
+      default: null
+    },
+    expiryNotifiedAt: {
+      type: Date,
+      default: null
     }
   },
   { timestamps: true }

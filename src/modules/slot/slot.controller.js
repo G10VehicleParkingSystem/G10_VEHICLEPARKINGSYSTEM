@@ -1,5 +1,38 @@
 const slotService = require("./slot.service");
 
+async function createSlot(req, res) {
+  try {
+    const slot = await slotService.createSlot(req.body);
+
+    return res.status(201).json({
+      success: true,
+      message: "Parking slot created successfully",
+      slot
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message
+    });
+  }
+}
+
+async function getSlots(req, res) {
+  try {
+    const slots = await slotService.getSlots(req.query.status);
+
+    return res.status(200).json({
+      success: true,
+      slots
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+}
+
 async function recommendSlot(req, res) {
   try {
     const { vehicleNumber } = req.body;
@@ -27,5 +60,7 @@ async function recommendSlot(req, res) {
 }
 
 module.exports = {
+  createSlot,
+  getSlots,
   recommendSlot
 };

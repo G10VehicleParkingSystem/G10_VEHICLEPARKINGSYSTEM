@@ -1,7 +1,68 @@
 const Reservation = require("../reservation/reservation.model");
+const Payment = require("../payment/payment.model");
+const Vehicle = require("../vehicle/vehicle.model");
+const ParkingSlot = require("../slot/slot.model");
+
+function roundAmount(amount) {
+  return Number(amount.toFixed(2));
+}
+
+function buildRevenueReport(payments) {
+  const successfulPayments = payments.filter(
+    (payment) => payment.status === "SUCCESS"
+  );
+
+  let parkingRevenue = 0;
+  let fineRevenue = 0;
+  const dailyRevenue = {};
+
+  successfulPayments.forEach((payment) => {
+    if (payment.fineId) {
+      fineRevenue += payment.amount;
+    } else {
+      parkingRevenue += payment.amount;
+    }
+
+    const day = new Date(payment.createdAt).toISOString().slice(0, 10);
+    dailyRevenue[day] = (dailyRevenue[day] || 0) + payment.amount;
+  });
+
+  return {
+    totalRevenue: roundAmount(parkingRevenue + fineRevenue),
+    parkingRevenue: roundAmount(parkingRevenue),
+    fineRevenue: roundAmount(fineRevenue),
+    successfulPayments: successfulPayments.length,
+    failedPayments: payments.filter((payment) => payment.status === "FAILED")
+      .length,
+    dailyRevenue: Object.entries(dailyRevenue)
+      .map(([date, amount]) => ({ date, amount: roundAmount(amount) }))
+      .sort((a, b) => a.date.localeCompare(b.date))
+  };
+}
+
+function buildCurrentOccupancy(slots) {
+  const occupiedSlots = slots.filter(
+    (slot) => slot.status === "OCCUPIED"
+  ).length;
+
+  return {
+    totalSlots: slots.length,
+    occupiedSlots,
+    availableSlots: slots.length - occupiedSlots,
+    occupancyRate:
+      slots.length === 0
+        ? 0
+        : roundAmount((occupiedSlots / slots.length) * 100)
+  };
+}
 
 async function getAnalytics() {
-  const reservations = await Reservation.find().lean();
+  const [reservations, payments, vehicles, slots] = await Promise.all([
+    Reservation.find().lean(),
+    Payment.find().lean(),
+    Vehicle.find().lean(),
+    ParkingSlot.find().lean()
+  ]);
 
   const confirmedReservations = reservations.filter(
     (reservation) => reservation.status === "CONFIRMED"
@@ -16,6 +77,12 @@ async function getAnalytics() {
   );
 
   // Slot occupancy
+  const slotNumbers = {};
+
+  slots.forEach((slot) => {
+    slotNumbers[slot._id.toString()] = slot.slotNumber;
+  });
+
   const slotUsage = {};
 
   reservations.forEach((reservation) => {
@@ -29,6 +96,7 @@ async function getAnalytics() {
   const frequentlyUsedSlots = Object.entries(slotUsage)
     .map(([slotId, count]) => ({
       slotId,
+      slotNumber: slotNumbers[slotId] || null,
       reservationCount: count
     }))
     .sort((a, b) => b.reservationCount - a.reservationCount);
@@ -52,21 +120,24 @@ async function getAnalytics() {
     .sort((a, b) => b.reservationCount - a.reservationCount);
 
   // Vehicle type breakdown
-  // vehicleId is kept here because the current reservation
-  // module stores vehicleId rather than vehicle type.
-  const vehicleUsage = {};
+  const vehicleTypes = {};
 
-  reservations.forEach((reservation) => {
-    const vehicle = reservation.vehicleId?.toString();
-
-    if (!vehicle) return;
-
-    vehicleUsage[vehicle] = (vehicleUsage[vehicle] || 0) + 1;
+  vehicles.forEach((vehicle) => {
+    vehicleTypes[vehicle._id.toString()] = vehicle.type;
   });
 
-  const vehicleTypeBreakdown = Object.entries(vehicleUsage)
-    .map(([vehicleId, count]) => ({
-      vehicleId,
+  const typeUsage = {};
+
+  reservations.forEach((reservation) => {
+    const type =
+      vehicleTypes[reservation.vehicleId?.toString()] || "UNKNOWN";
+
+    typeUsage[type] = (typeUsage[type] || 0) + 1;
+  });
+
+  const vehicleTypeBreakdown = Object.entries(typeUsage)
+    .map(([type, count]) => ({
+      type,
       reservationCount: count
     }))
     .sort((a, b) => b.reservationCount - a.reservationCount);
@@ -80,6 +151,7 @@ async function getAnalytics() {
     },
 
     occupancy: {
+      current: buildCurrentOccupancy(slots),
       frequentlyUsedSlots
     },
 
@@ -87,11 +159,7 @@ async function getAnalytics() {
 
     vehicleTypeBreakdown,
 
-    revenue: {
-      message:
-        "Revenue calculation will be connected when the payment module is integrated.",
-      totalRevenue: 0
-    }
+    revenue: buildRevenueReport(payments)
   };
 }
 

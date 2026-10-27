@@ -24,8 +24,7 @@ jobs:
 
       - name: Check JavaScript syntax
         run: |
-          node --check server.js
-          node --check src/modules/reservation/reservation.controller.js
-          node --check src/modules/reservation/reservation.service.js
-          node --check src/modules/notification/notification.controller.js
-          node --check src/modules/notification/notification.service.js
+          find server.js src tests -name "*.js" -print0 | xargs -0 -n1 node --check
+
+      - name: Run unit tests
+        run: npm test

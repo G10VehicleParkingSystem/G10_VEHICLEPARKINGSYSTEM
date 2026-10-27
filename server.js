@@ -9,6 +9,7 @@ const notificationRoutes = require("./src/modules/notification/notification.rout
 const paymentRoutes = require("./src/modules/payment/payment.routes");
 const overstayRoutes = require("./src/modules/overstay/overstay.routes");
 const overstayService = require("./src/modules/overstay/overstay.service");
+const notificationReminders = require("./src/modules/notification/notification.reminders");
 const analyticsRoutes = require("./src/modules/analytics/analytics.routes");
 const vehicleRoutes = require("./src/modules/vehicle/vehicle.routes");
 const slotRoutes = require("./src/modules/slot/slot.routes");
@@ -24,7 +25,7 @@ app.use(express.json());
 app.get("/api/health", (req, res) => {
   res.json({
     success: true,
-    message: "G10 FR-2 + FR-3 + FR-5 + FR-7 backend is running"
+    message: "G10 Vehicle Parking System backend (FR-1 to FR-7) is running"
   });
 });
 
@@ -64,8 +65,22 @@ async function startServer() {
         console.error("Overstay detection failed:", error.message);
       }
     };
+    const sendReminders = async () => {
+      try {
+        const result = await notificationReminders.sendReservationReminders();
+        if (result.upcoming + result.expiring > 0) {
+          console.log(
+            `Sent ${result.upcoming} upcoming and ${result.expiring} expiry reminder(s)`
+          );
+        }
+      } catch (error) {
+        console.error("Reservation reminders failed:", error.message);
+      }
+    };
     setInterval(detectOverstays, overstayInterval).unref();
+    setInterval(sendReminders, overstayInterval).unref();
     void detectOverstays();
+    void sendReminders();
     app.listen(PORT, () => {
       console.log(`Server running at http://localhost:${PORT}`);
     });

@@ -1,5 +1,7 @@
 const Reservation = require("../reservation/reservation.model");
 const OverstayFine = require("./overstay.model");
+const ParkingSession = require("../parking/parking.model");
+const parkingService = require("../parking/parking.service");
 const notificationService = require("../notification/notification.service");
 const { calculateOverstayFine } = require("../payment/payment.calculations");
 
@@ -20,10 +22,18 @@ async function updateFineForReservation(reservation, now) {
   const existingFine = await OverstayFine.findOne({
     reservationId: reservation._id
   });
+  const session = await ParkingSession.findOne({
+    reservationId: reservation._id
+  });
   const fine = await OverstayFine.findOneAndUpdate(
     { reservationId: reservation._id },
     {
-      $set: { userId: reservation.userId, overdueMinutes, fineAmount },
+      $set: {
+        userId: reservation.userId,
+        sessionId: session ? session._id : null,
+        overdueMinutes,
+        fineAmount
+      },
       $setOnInsert: { status: "UNPAID" }
     },
     { new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true }
@@ -77,6 +87,7 @@ async function checkout({ reservationId, userId, now = new Date() }) {
     fine = await updateFineForReservation(reservation, now) || fine;
     reservation.status = "COMPLETED";
     await reservation.save();
+    await parkingService.completeSession(reservation._id, now);
   }
 
   return { reservation, fine };
