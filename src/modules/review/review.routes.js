@@ -1,26 +1,29 @@
+
 const express = require("express");
 
 const {
   createReview,
-  getReviewsByLocation,
+  getReviewsBySlot,
   getReviewsByUser,
   updateReview,
-  deleteReview,
-  getAllReviews,
-  deleteReviewByAdmin
+  deleteReview
 } = require("./review.controller");
 
 const router = express.Router();
 
-// User routes
+// Submit a review
 router.post("/", createReview);
-router.get("/user", getReviewsByUser);
-router.get("/location/:locationId", getReviewsByLocation);
-router.patch("/:id", updateReview);
-router.delete("/:id", deleteReview);
 
-// Admin routes
-router.get("/admin/all", getAllReviews);
-router.delete("/admin/:id", deleteReviewByAdmin);
+// View reviews for a parking slot
+router.get("/slot/:slotId", getReviewsBySlot);
+
+// View reviews submitted by a user
+router.get("/user/:userId", getReviewsByUser);
+
+// Update own review (userId supplied in request body)
+router.patch("/:id", updateReview);
+
+// Delete own review (userId supplied as query parameter)
+router.delete("/:id", deleteReview);
 
 module.exports = router;

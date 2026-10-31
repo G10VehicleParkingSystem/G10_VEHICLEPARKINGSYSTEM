@@ -1,27 +1,59 @@
+
+const mongoose = require("mongoose");
 const Review = require("./review.model");
+const Reservation = require("../reservation/reservation.model");
+const ParkingSession = require("../parking/parking.model");
 
-const createReview = async (data) => {
-  return await Review.create(data);
-};
+async function createReview({ userId, reservationId, rating, review }) {
+  // Verify reservation belongs to the supplied user
+  const reservation = await Reservation.findOne({
+    _id: reservationId,
+    userId
+  });
 
-const getReviewsByLocation = async (locationId) => {
-  return await Review.find({
-    parkingLocationId: locationId
-  })
+  if (!reservation) {
+    throw new Error("Reservation not found for this user");
+  }
+
+  // Verify that the user has completed the parking session
+  const session = await ParkingSession.findOne({
+    reservationId,
+    userId,
+    status: "COMPLETED"
+  });
+
+  if (!session) {
+    throw new Error("Review allowed only after completed parking");
+  }
+
+  // Create review using the actual slot from the parking session
+  return Review.create({
+    userId,
+    reservationId,
+    slotId: session.slotId,
+    rating,
+    review: review || ""
+  });
+}
+
+async function getReviewsBySlot(slotId) {
+  return Review.find({ slotId })
     .sort({ createdAt: -1 })
-    .populate("userId", "name")
     .lean();
-};
+}
 
-const getReviewsByUser = async (userId) => {
-  return await Review.find({ userId })
+async function getReviewsByUser(userId) {
+  return Review.find({ userId })
     .sort({ createdAt: -1 })
     .lean();
-};
+}
 
-const updateReview = async (reviewId, userId, data) => {
-  return await Review.findOneAndUpdate(
-    { _id: reviewId, userId },
+async function updateReview(reviewId, userId, data) {
+  return Review.findOneAndUpdate(
+    {
+      _id: reviewId,
+      userId
+    },
     {
       rating: data.rating,
       review: data.review
@@ -31,33 +63,20 @@ const updateReview = async (reviewId, userId, data) => {
       runValidators: true
     }
   );
-};
+}
 
-const deleteReview = async (reviewId, userId) => {
-  return await Review.findOneAndDelete({
+async function deleteReview(reviewId, userId) {
+  return Review.findOneAndDelete({
     _id: reviewId,
     userId
   });
-};
+}
 
-const getAllReviews = async () => {
-  return await Review.find()
-    .sort({ createdAt: -1 })
-    .populate("userId", "name")
-    .lean();
-};
-
-const deleteReviewByAdmin = async (reviewId) => {
-  return await Review.findByIdAndDelete(reviewId);
-};
-
-const getLocationRating = async (locationId) => {
+async function getSlotRating(slotId) {
   const result = await Review.aggregate([
     {
       $match: {
-        parkingLocationId: require("mongoose").Types.ObjectId.createFromHexString(
-          locationId
-        )
+        slotId: new mongoose.Types.ObjectId(slotId)
       }
     },
     {
@@ -69,18 +88,24 @@ const getLocationRating = async (locationId) => {
     }
   ]);
 
-  return result.length
-    ? result[0]
-    : { averageRating: 0, totalReviews: 0 };
-};
+  if (result.length === 0) {
+    return {
+      averageRating: 0,
+      totalReviews: 0
+    };
+  }
+
+  return {
+    averageRating: Number(result[0].averageRating.toFixed(2)),
+    totalReviews: result[0].totalReviews
+  };
+}
 
 module.exports = {
   createReview,
-  getReviewsByLocation,
+  getReviewsBySlot,
   getReviewsByUser,
   updateReview,
   deleteReview,
-  getAllReviews,
-  deleteReviewByAdmin,
-  getLocationRating
+  getSlotRating
 };

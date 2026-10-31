@@ -1,21 +1,23 @@
+
 const mongoose = require("mongoose");
 
 const reviewSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      required: true,
-      index: true
+      required: true
     },
 
     reservationId: {
       type: mongoose.Schema.Types.ObjectId,
+      ref: "Reservation",
       required: true,
       unique: true
     },
 
-    parkingLocationId: {
+    slotId: {
       type: mongoose.Schema.Types.ObjectId,
+      ref: "ParkingSlot",
       required: true,
       index: true
     },
@@ -24,7 +26,11 @@ const reviewSchema = new mongoose.Schema(
       type: Number,
       required: true,
       min: 1,
-      max: 5
+      max: 5,
+      validate: {
+        validator: Number.isInteger,
+        message: "Rating must be a whole number between 1 and 5"
+      }
     },
 
     review: {

@@ -1,54 +1,47 @@
-const service = require("./review.service");
+
+const reviewService = require("./review.service");
 
 const isValidId = (id) =>
-  /^[a-f\d]{24}$/i.test(String(id || ""));
+  typeof id === "string" &&
+  /^[a-fA-F0-9]{24}$/.test(id);
 
-const createReview = async (req, res) => {
+async function createReview(req, res) {
   try {
-    const userId = req.user?._id || req.user?.id;
+    const { userId, reservationId, rating, review } = req.body;
 
-    if (!userId) {
-      return res.status(401).json({
+    if (!isValidId(userId) || !isValidId(reservationId)) {
+      return res.status(400).json({
         success: false,
-        message: "Authentication required"
+        message: "Valid userId and reservationId are required"
       });
     }
 
-    const { reservationId, parkingLocationId, rating, review } = req.body;
-
     if (
-      !isValidId(reservationId) ||
-      !isValidId(parkingLocationId) ||
       !Number.isInteger(rating) ||
       rating < 1 ||
       rating > 5
     ) {
       return res.status(400).json({
         success: false,
-        message: "Invalid reservation, location or rating"
+        message: "Rating must be an integer between 1 and 5"
       });
     }
 
-    if (review && typeof review !== "string") {
+    if (
+      review !== undefined &&
+      (typeof review !== "string" || review.length > 500)
+    ) {
       return res.status(400).json({
         success: false,
-        message: "Review must be text"
+        message: "Review must be text with a maximum of 500 characters"
       });
     }
 
-    if (review && review.length > 500) {
-      return res.status(400).json({
-        success: false,
-        message: "Review cannot exceed 500 characters"
-      });
-    }
-
-    const result = await service.createReview({
+    const result = await reviewService.createReview({
       userId,
       reservationId,
-      parkingLocationId,
       rating,
-      review: review || ""
+      review
     });
 
     return res.status(201).json({
@@ -64,29 +57,26 @@ const createReview = async (req, res) => {
       });
     }
 
-    return res.status(500).json({
+    return res.status(400).json({
       success: false,
-      message: "Unable to submit review"
+      message: error.message
     });
   }
-};
+}
 
-const getReviewsByLocation = async (req, res) => {
+async function getReviewsBySlot(req, res) {
   try {
-    if (!isValidId(req.params.locationId)) {
+    const { slotId } = req.params;
+
+    if (!isValidId(slotId)) {
       return res.status(400).json({
         success: false,
-        message: "Invalid location ID"
+        message: "Invalid slot ID"
       });
     }
 
-    const reviews = await service.getReviewsByLocation(
-      req.params.locationId
-    );
-
-    const rating = await service.getLocationRating(
-      req.params.locationId
-    );
+    const reviews = await reviewService.getReviewsBySlot(slotId);
+    const rating = await reviewService.getSlotRating(slotId);
 
     return res.status(200).json({
       success: true,
@@ -99,20 +89,20 @@ const getReviewsByLocation = async (req, res) => {
       message: "Unable to fetch reviews"
     });
   }
-};
+}
 
-const getReviewsByUser = async (req, res) => {
+async function getReviewsByUser(req, res) {
   try {
-    const userId = req.user?._id || req.user?.id;
+    const { userId } = req.params;
 
-    if (!userId) {
-      return res.status(401).json({
+    if (!isValidId(userId)) {
+      return res.status(400).json({
         success: false,
-        message: "Authentication required"
+        message: "Invalid user ID"
       });
     }
 
-    const reviews = await service.getReviewsByUser(userId);
+    const reviews = await reviewService.getReviewsByUser(userId);
 
     return res.status(200).json({
       success: true,
@@ -124,51 +114,54 @@ const getReviewsByUser = async (req, res) => {
       message: "Unable to fetch user reviews"
     });
   }
-};
+}
 
-const updateReview = async (req, res) => {
+async function updateReview(req, res) {
   try {
-    const userId = req.user?._id || req.user?.id;
+    const { id } = req.params;
+    const { userId, rating, review } = req.body;
 
-    if (!userId) {
-      return res.status(401).json({
-        success: false,
-        message: "Authentication required"
-      });
-    }
-
-    const { rating, review } = req.body;
-
-    if (!isValidId(req.params.id)) {
+    if (!isValidId(id) || !isValidId(userId)) {
       return res.status(400).json({
         success: false,
-        message: "Invalid review ID"
+        message: "Valid review ID and user ID are required"
       });
     }
 
     if (
       !Number.isInteger(rating) ||
       rating < 1 ||
-      rating > 5 ||
-      (review !== undefined &&
-        (typeof review !== "string" || review.length > 500))
+      rating > 5
     ) {
       return res.status(400).json({
         success: false,
-        message: "Invalid rating or review"
+        message: "Rating must be an integer between 1 and 5"
       });
     }
 
-    const updated = await service.updateReview(
-      req.params.id,
+    if (
+      review !== undefined &&
+      (typeof review !== "string" || review.length > 500)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid review text"
+      });
+    }
+
+    const updated = await reviewService.updateReview(
+      id,
       userId,
-      { rating, review: review || "" }
+      {
+        rating,
+        review: review || ""
+      }
     );
 
     if (!updated) {
       return res.status(404).json({
         success: false,
-        message: "Review not found or not owned by you"
+        message: "Review not found for this user"
       });
     }
 
@@ -178,40 +171,31 @@ const updateReview = async (req, res) => {
       data: updated
     });
   } catch (error) {
-    return res.status(500).json({
+    return res.status(400).json({
       success: false,
-      message: "Unable to update review"
+      message: error.message
     });
   }
-};
+}
 
-const deleteReview = async (req, res) => {
+async function deleteReview(req, res) {
   try {
-    const userId = req.user?._id || req.user?.id;
+    const { id } = req.params;
+    const { userId } = req.query;
 
-    if (!userId) {
-      return res.status(401).json({
-        success: false,
-        message: "Authentication required"
-      });
-    }
-
-    if (!isValidId(req.params.id)) {
+    if (!isValidId(id) || !isValidId(userId)) {
       return res.status(400).json({
         success: false,
-        message: "Invalid review ID"
+        message: "Valid review ID and user ID are required"
       });
     }
 
-    const deleted = await service.deleteReview(
-      req.params.id,
-      userId
-    );
+    const deleted = await reviewService.deleteReview(id, userId);
 
     if (!deleted) {
       return res.status(404).json({
         success: false,
-        message: "Review not found or not owned by you"
+        message: "Review not found for this user"
       });
     }
 
@@ -225,62 +209,12 @@ const deleteReview = async (req, res) => {
       message: "Unable to delete review"
     });
   }
-};
-
-const getAllReviews = async (req, res) => {
-  try {
-    const reviews = await service.getAllReviews();
-
-    return res.status(200).json({
-      success: true,
-      data: reviews
-    });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Unable to fetch reviews"
-    });
-  }
-};
-
-const deleteReviewByAdmin = async (req, res) => {
-  try {
-    if (!isValidId(req.params.id)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid review ID"
-      });
-    }
-
-    const deleted = await service.deleteReviewByAdmin(
-      req.params.id
-    );
-
-    if (!deleted) {
-      return res.status(404).json({
-        success: false,
-        message: "Review not found"
-      });
-    }
-
-    return res.status(200).json({
-      success: true,
-      message: "Review removed successfully"
-    });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Unable to delete review"
-    });
-  }
-};
+}
 
 module.exports = {
   createReview,
-  getReviewsByLocation,
+  getReviewsBySlot,
   getReviewsByUser,
   updateReview,
-  deleteReview,
-  getAllReviews,
-  deleteReviewByAdmin
+  deleteReview
 };
