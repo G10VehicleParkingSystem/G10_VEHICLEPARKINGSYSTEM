@@ -14,6 +14,8 @@ const analyticsRoutes = require("./src/modules/analytics/analytics.routes");
 const vehicleRoutes = require("./src/modules/vehicle/vehicle.routes");
 const slotRoutes = require("./src/modules/slot/slot.routes");
 const parkingRoutes = require("./src/modules/parking/parking.routes");
+const subscriptionRoutes = require("./src/modules/subscription/subscription.routes");
+const subscriptionService = require("./src/modules/subscription/subscription.service");
 
 
 const app = express();
@@ -25,7 +27,7 @@ app.use(express.json());
 app.get("/api/health", (req, res) => {
   res.json({
     success: true,
-    message: "G10 Vehicle Parking System backend (FR-1 to FR-7) is running"
+    message: "G10 Vehicle Parking System backend (FR-1 to FR-8) is running"
   });
 });
 
@@ -37,6 +39,7 @@ app.use("/api/analytics", analyticsRoutes);
 app.use("/api/vehicles", vehicleRoutes);
 app.use("/api/slots", slotRoutes);
 app.use("/api/parking", parkingRoutes);
+app.use("/api/subscriptions", subscriptionRoutes);
 
 
 const PORT = process.env.PORT || 5000;
@@ -77,10 +80,25 @@ async function startServer() {
         console.error("Reservation reminders failed:", error.message);
       }
     };
+    const expireSubscriptionRecords = async () => {
+      try {
+        const result = await subscriptionService.expireSubscriptions();
+
+        if (result.expired > 0 || result.abandonedPayments > 0) {
+          console.log(
+            `Expired ${result.expired} subscription(s) and cleared ${result.abandonedPayments} abandoned pending payment(s)`
+          );
+        }
+      } catch (error) {
+        console.error("Subscription expiry failed:", error.message);
+      }
+    };
     setInterval(detectOverstays, overstayInterval).unref();
     setInterval(sendReminders, overstayInterval).unref();
+    setInterval(expireSubscriptionRecords, overstayInterval).unref();
     void detectOverstays();
     void sendReminders();
+    void expireSubscriptionRecords();
     app.listen(PORT, () => {
       console.log(`Server running at http://localhost:${PORT}`);
     });

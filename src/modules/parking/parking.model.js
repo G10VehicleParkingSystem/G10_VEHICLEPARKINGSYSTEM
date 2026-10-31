@@ -8,6 +8,12 @@ const parkingSessionSchema = new mongoose.Schema(
       default: null
     },
 
+    subscriptionId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Subscription",
+      default: null
+    },
+
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       default: null
