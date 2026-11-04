@@ -1,3 +1,4 @@
+const Subscription = require("../subscription/subscription.model");
 const ParkingSlot = require("./slot.model");
 const Vehicle = require("../vehicle/vehicle.model");
 
@@ -63,8 +64,27 @@ async function recommendSlot(vehicleNumber) {
     throw error;
   }
 
+    const now = new Date();
+
+  const activeSubscriptions = await Subscription.find({
+    startDate: { $lte: now },
+    endDate: { $gt: now },
+    $or: [
+      { status: "ACTIVE" },
+      {
+        status: "PENDING_PAYMENT",
+        pendingExpiresAt: { $gt: now }
+      }
+    ]
+  }).select("slotId");
+
+  const reservedSlotIds = activeSubscriptions.map(
+    (subscription) => subscription.slotId
+  );
+
   const suitableSlots = await ParkingSlot.find({
     status: "AVAILABLE",
+    _id: { $nin: reservedSlotIds },
     length: { $gte: vehicle.length },
     width: { $gte: vehicle.width },
     height: { $gte: vehicle.height }

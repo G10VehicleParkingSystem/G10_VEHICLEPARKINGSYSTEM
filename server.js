@@ -15,6 +15,8 @@ const analyticsRoutes = require("./src/modules/analytics/analytics.routes");
 const vehicleRoutes = require("./src/modules/vehicle/vehicle.routes");
 const slotRoutes = require("./src/modules/slot/slot.routes");
 const parkingRoutes = require("./src/modules/parking/parking.routes");
+const subscriptionRoutes = require("./src/modules/subscription/subscription.routes");
+const subscriptionService = require("./src/modules/subscription/subscription.service");
 
 // FR-8: Review module
 const reviewRoutes = require("./src/modules/review/review.routes");
@@ -40,6 +42,7 @@ app.use("/api/analytics", analyticsRoutes);
 app.use("/api/vehicles", vehicleRoutes);
 app.use("/api/slots", slotRoutes);
 app.use("/api/parking", parkingRoutes);
+app.use("/api/subscriptions", subscriptionRoutes);
 
 // FR-8: Review routes
 app.use("/api/reviews", reviewRoutes);
@@ -90,13 +93,29 @@ async function startServer() {
         console.error("Reservation reminders failed:", error.message);
       }
     };
+    const expireSubscriptionRecords = async () => {
+      try {
+        const result = await subscriptionService.expireSubscriptions();
 
+        if (result.expired > 0 || result.abandonedPayments > 0) {
+          console.log(
+            `Expired ${result.expired} subscription(s) and cleared ${result.abandonedPayments} abandoned pending payment(s)`
+          );
+        }
+      } catch (error) {
+        console.error("Subscription expiry failed:", error.message);
+      }
+    };
+
+    // Start all background schedulers
     setInterval(detectOverstays, overstayInterval).unref();
     setInterval(sendReminders, overstayInterval).unref();
+    setInterval(expireSubscriptionRecords, overstayInterval).unref();
 
+    // Run each job once when the server starts
     void detectOverstays();
     void sendReminders();
-
+    void expireSubscriptionRecords();
     app.listen(PORT, () => {
       console.log(`Server running at http://localhost:${PORT}`);
     });

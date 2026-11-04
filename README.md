@@ -1,6 +1,6 @@
 # G10 Vehicle Parking System — Backend
 
-Express + MongoDB backend implementing the seven functional requirements from
+Express + MongoDB backend implementing the eight functional requirements from
 the G10 SRS:
 
 - FR-1: Vehicle-Size-Based Smart Slot Allocation & Recommendation
@@ -10,6 +10,7 @@ the G10 SRS:
 - FR-5: Overstay Detection & Fines
 - FR-6: Admin Analytics & Reports
 - FR-7: Notifications & Alerts
+- FR-8: Monthly Reserved Parking Subscription
 
 Sprint documentation lives in [`docs/`](docs): the
 [Sprint 1 report](docs/SPRINT1_REPORT.md) and the
@@ -48,9 +49,13 @@ npm test
 | `PAYMENT_GATEWAY` | unset | Set to `demo` to simulate successful payments |
 | `HOURLY_PARKING_RATE` | 50 | INR per started hour of a reservation |
 | `FINE_PER_HOUR` | 100 | INR per started hour of overstay |
+| `MONTHLY_SUBSCRIPTION_RATE` | 3000 | Monthly reserved parking subscription fee in INR |
 | `OVERSTAY_CHECK_INTERVAL_MS` | 60000 | How often overstays and reminders are checked |
 | `UPCOMING_REMINDER_MINUTES` | 30 | Notify this long before a reservation starts |
 | `EXPIRY_REMINDER_MINUTES` | 15 | Notify this long before parking ends |
+
+`MONTHLY_SUBSCRIPTION_RATE` is a configurable development default, not a
+confirmed business price.
 
 ## Typical flow
 
@@ -175,16 +180,102 @@ reservation, parking about to expire, payment success/failure and overstay.
 `POST /api/notifications` with `userId`, `type`, `title`, `message` and an
 optional `relatedId`.
 
+### FR-8 Monthly Reserved Parking Subscription
+
+Users can subscribe to a specific parking slot for one calendar month by paying
+the configured monthly subscription fee.
+
+**Subscription endpoints**
+
+`GET /api/subscriptions/plans`
+
+Returns the available monthly subscription plan, including its duration, price
+and currency.
+
+`POST /api/subscriptions`
+
+Creates a monthly subscription.
+
+Example request:
+
+```json
+{
+  "userId": "000000000000000000000001",
+  "vehicleId": "<vehicle _id>",
+  "slotId": "<slot _id>",
+  "paymentMethod": "UPI"
+}
+```
+
+Supported payment methods are `UPI`, `CARD`, `NET_BANKING` and `WALLET`.
+
+`GET /api/subscriptions/my/:userId`
+
+Returns the subscriptions belonging to the specified user.
+
+`POST /api/subscriptions/:id/renew`
+
+Manually renews an active subscription by submitting `userId` and
+`paymentMethod` in the request body. Renewal is not automatic.
+
+`PATCH /api/subscriptions/:id/cancel`
+
+Schedules cancellation at the end of the current subscription period. The slot
+remains protected until the subscription expires.
+
+**Subscription parking endpoints**
+
+`POST /api/parking/subscription/check-in`
+
+Example request:
+
+```json
+{
+  "subscriptionId": "<subscription _id>",
+  "userId": "000000000000000000000001"
+}
+```
+
+Checks the subscriber into their reserved slot and creates an active parking
+session. The slot is marked `OCCUPIED` while the vehicle is physically parked.
+
+`POST /api/parking/subscription/:subscriptionId/check-out`
+
+Example request:
+
+```json
+{
+  "userId": "000000000000000000000001"
+}
+```
+
+Completes the parking session and releases the physical slot.
+
+**Subscription lifecycle and slot protection**
+
+- A successful initial payment activates the subscription for one calendar month.
+- Pending payments temporarily lock the selected slot. Uncompleted payments expire after five minutes.
+- Active subscriptions protect their slots from overlapping reservations and other subscriptions.
+- A subscribed slot is not marked `OCCUPIED` merely because it is reserved. Its physical occupancy changes only through parking check-in and check-out.
+- Users can repeatedly check in and check out during their active subscription period.
+- Renewal is manual. No automatic payment is charged.
+- When the subscription expires, the slot protection is released.
+- Subscription expiry and abandoned pending payments are checked automatically by the server using `OVERSTAY_CHECK_INTERVAL_MS`.
+
+As with the other user-scoped APIs, `userId` is temporarily supplied by the
+client until authentication is implemented.
+
 ## Folder structure
 
 ```text
-server.js                 # app setup, routes, overstay + reminder schedulers
+server.js                 # app setup, routes and background schedulers
 src/modules/
   vehicle/                # FR-1 vehicle registration
   slot/                   # FR-1 slots and recommendation
   reservation/            # FR-2
   payment/                # FR-3 (calculations, gateway, service)
-  parking/                # FR-4 sessions and tracking
+  parking/                # FR-4 sessions, tracking and FR-8 subscription parking
+  subscription/           # FR-8 monthly reserved parking
   overstay/               # FR-5
   analytics/              # FR-6
   notification/           # FR-7 (service + reminder scheduler)

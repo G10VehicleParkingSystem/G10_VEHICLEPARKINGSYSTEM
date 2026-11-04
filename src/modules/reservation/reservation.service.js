@@ -1,19 +1,38 @@
 const mongoose = require("mongoose");
 const Reservation = require("./reservation.model");
+const Subscription = require("../subscription/subscription.model");
 const Vehicle = require("../vehicle/vehicle.model");
 const ParkingSlot = require("../slot/slot.model");
 const notificationService = require("../notification/notification.service");
 const { vehicleFitsSlot } = require("../slot/slot.service");
 
 async function checkSlotAvailability(slotId, startTime, endTime) {
-  const overlappingReservation = await Reservation.findOne({
-    slotId,
-    status: "CONFIRMED",
-    startTime: { $lt: endTime },
-    endTime: { $gt: startTime }
-  });
+  const now = new Date();
 
-  return !overlappingReservation;
+  const [overlappingReservation, overlappingSubscription] =
+    await Promise.all([
+      Reservation.findOne({
+        slotId,
+        status: "CONFIRMED",
+        startTime: { $lt: endTime },
+        endTime: { $gt: startTime }
+      }),
+
+      Subscription.findOne({
+        slotId,
+        startDate: { $lt: endTime },
+        endDate: { $gt: startTime },
+        $or: [
+          { status: "ACTIVE" },
+          {
+            status: "PENDING_PAYMENT",
+            pendingExpiresAt: { $gt: now }
+          }
+        ]
+      })
+    ]);
+
+  return !overlappingReservation && !overlappingSubscription;
 }
 
 async function createReservation({

@@ -5,6 +5,7 @@ const Reservation = require("../src/modules/reservation/reservation.model");
 const Vehicle = require("../src/modules/vehicle/vehicle.model");
 const ParkingSlot = require("../src/modules/slot/slot.model");
 const Notification = require("../src/modules/notification/notification.model");
+const Subscription = require("../src/modules/subscription/subscription.model");
 const reservationService = require("../src/modules/reservation/reservation.service");
 const { createReservation } = require("../src/modules/reservation/reservation.controller");
 const {
@@ -84,6 +85,9 @@ test("reservation rejects a vehicle that does not fit the slot", async (t) => {
 test("reservation rejects overlapping bookings for the same slot", async (t) => {
   let overlapQuery;
   stubVehicleAndSlot(t, { vehicle: car, slot: largeSlot });
+  stubModel(t, Subscription, {
+    findOne: async () => null
+  });
   stubModel(t, Reservation, {
     findOne: async (filter) => {
       overlapQuery = filter;
@@ -105,6 +109,9 @@ test("a confirmed reservation sends a confirmation notification", async (t) => {
   const reservationId = id();
   let notification;
   stubVehicleAndSlot(t, { vehicle: car, slot: largeSlot });
+  stubModel(t, Subscription, {
+    findOne: async () => null
+  });
   stubModel(t, Reservation, {
     findOne: async () => null,
     create: async (data) => ({ ...data, _id: reservationId })

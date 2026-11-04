@@ -1,3 +1,4 @@
+const Subscription = require("../src/modules/subscription/subscription.model");
 const test = require("node:test");
 const assert = require("node:assert/strict");
 
@@ -77,6 +78,11 @@ test("recommendation queries available slots large enough for the vehicle", asyn
   let sort;
   const slot = { slotNumber: "A1" };
   stubModel(t, Vehicle, { findOne: async () => car });
+  stubModel(t, Subscription, {
+    find: () => ({
+      select: async () => []
+    })
+  });
   stubModel(t, ParkingSlot, {
     find: (filter) => {
       query = filter;
@@ -94,6 +100,7 @@ test("recommendation queries available slots large enough for the vehicle", asyn
   assert.equal(result, slot);
   assert.deepEqual(query, {
     status: "AVAILABLE",
+    _id: { $nin: [] },
     length: { $gte: 4.5 },
     width: { $gte: 1.8 },
     height: { $gte: 1.5 }
@@ -103,6 +110,11 @@ test("recommendation queries available slots large enough for the vehicle", asyn
 
 test("recommendation reports when no suitable slot is available", async (t) => {
   stubModel(t, Vehicle, { findOne: async () => car });
+  stubModel(t, Subscription, {
+    find: () => ({
+      select: async () => []
+    })
+  });
   stubModel(t, ParkingSlot, { find: () => ({ sort: async () => [] }) });
 
   await assert.rejects(
