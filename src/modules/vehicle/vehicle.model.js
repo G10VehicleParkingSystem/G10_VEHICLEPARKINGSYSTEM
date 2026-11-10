@@ -32,7 +32,14 @@ const vehicleSchema = new mongoose.Schema(
       type: Number,
       required: true,
       min: 0
+    },
+    qrToken: {
+      type: String,
+      required: true,
+      unique: true,
+      select: false
     }
+    
   },
   { timestamps: true }
 );

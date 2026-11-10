@@ -1,4 +1,7 @@
+
 const Vehicle = require("./vehicle.model");
+const crypto = require("crypto");
+const QRCode = require("qrcode");
 
 async function registerVehicle({
   vehicleNumber,
@@ -29,21 +32,40 @@ async function registerVehicle({
     throw new Error("Vehicle dimensions must be greater than zero");
   }
 
+  const normalizedNumber = vehicleNumber.trim().toUpperCase();
+
   const existingVehicle = await Vehicle.findOne({
-    vehicleNumber: vehicleNumber.toUpperCase()
+    vehicleNumber: normalizedNumber
   });
 
   if (existingVehicle) {
     throw new Error("Vehicle is already registered");
   }
 
-  return Vehicle.create({
-    vehicleNumber: vehicleNumber.toUpperCase(),
+  // Generate a secure, unique token for this vehicle
+  const qrToken = crypto.randomBytes(32).toString("hex");
+
+  // Save vehicle details and token in MongoDB
+  const vehicle = await Vehicle.create({
+    vehicleNumber: normalizedNumber,
     type,
     length,
     width,
-    height
+    height,
+    qrToken
   });
+
+  // Generate QR code containing only the token
+  const qrCode = await QRCode.toDataURL(qrToken, {
+    errorCorrectionLevel: "H",
+    width: 300,
+    margin: 2
+  });
+
+  return {
+    vehicle,
+    qrCode
+  };
 }
 
 async function getVehicle(vehicleNumber) {
@@ -58,7 +80,60 @@ async function getVehicle(vehicleNumber) {
   return vehicle;
 }
 
+// Generate/retrieve QR code for an existing vehicle
+
+async function getVehicleQr(vehicleNumber) {
+  const vehicle = await Vehicle.findOne({
+    vehicleNumber: vehicleNumber.toUpperCase()
+  }).select("+qrToken");
+
+  if (!vehicle) {
+    throw new Error("Vehicle not found");
+  }
+
+  // Generate a token for older vehicle records
+  if (!vehicle.qrToken) {
+    vehicle.qrToken = crypto.randomBytes(32).toString("hex");
+    await vehicle.save();
+  }
+
+  const qrCode = await QRCode.toDataURL(vehicle.qrToken, {
+    errorCorrectionLevel: "H",
+    width: 300,
+    margin: 2
+  });
+
+  return qrCode;
+}
+
+// Verify a scanned QR code
+async function verifyVehicleQr(token) {
+  if (!token || typeof token !== "string") {
+    throw new Error("Valid QR token is required");
+  }
+
+  const vehicle = await Vehicle.findOne({
+    qrToken: token
+  }).select("+qrToken");
+
+  if (!vehicle) {
+    throw new Error("Invalid QR code or vehicle not found");
+  }
+
+  // Return vehicle information without exposing the QR token
+  return {
+    id: vehicle._id,
+    vehicleNumber: vehicle.vehicleNumber,
+    type: vehicle.type,
+    length: vehicle.length,
+    width: vehicle.width,
+    height: vehicle.height
+  };
+}
+
 module.exports = {
   registerVehicle,
-  getVehicle
+  getVehicle,
+  getVehicleQr,
+  verifyVehicleQr
 };

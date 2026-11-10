@@ -10,7 +10,6 @@ const notificationRoutes = require("./src/modules/notification/notification.rout
 const paymentRoutes = require("./src/modules/payment/payment.routes");
 const overstayRoutes = require("./src/modules/overstay/overstay.routes");
 const overstayService = require("./src/modules/overstay/overstay.service");
-const notificationReminders = require("./src/modules/notification/notification.reminders");
 const analyticsRoutes = require("./src/modules/analytics/analytics.routes");
 const vehicleRoutes = require("./src/modules/vehicle/vehicle.routes");
 const slotRoutes = require("./src/modules/slot/slot.routes");
