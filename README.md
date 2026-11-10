@@ -11,6 +11,7 @@ the G10 SRS:
 - FR-6: Admin Analytics & Reports
 - FR-7: Notifications & Alerts
 - FR-8: Monthly Reserved Parking Subscription
+- FR-9: Review and ratings
 
 Sprint documentation lives in [`docs/`](docs): the
 [Sprint 1 report](docs/SPRINT1_REPORT.md) and the
@@ -265,6 +266,52 @@ Completes the parking session and releases the physical slot.
 As with the other user-scoped APIs, `userId` is temporarily supplied by the
 client until authentication is implemented.
 
+### FR-9 Parking Reviews & Ratings
+
+Users can submit ratings and feedback for a parking slot after completing
+their parking session.
+
+**Review endpoints**
+
+`POST /api/reviews`
+
+Creates a review for a completed parking reservation.
+
+Example request:
+
+```json
+{
+  "userId": "<user _id>",
+  "reservationId": "<reservation _id>",
+  "rating": 5,
+  "review": "Clean parking area and helpful staff."
+}
+```
+
+- Ratings must be whole numbers between 1 and 5.
+- Written feedback is optional and limited to 500 characters.
+- Reviews are allowed only after completed parking sessions.
+- Only one review is allowed per reservation.
+
+`GET /api/reviews/slot/:slotId`
+
+Returns reviews for a parking slot, along with average rating and total review count.
+
+`GET /api/reviews/user/:userId`
+
+Returns reviews submitted by a particular user.
+
+`PATCH /api/reviews/:id`
+
+Updates an existing review using `userId`, `rating` and `review`.
+
+`DELETE /api/reviews/:id?userId=...`
+
+Deletes a review belonging to the specified user.
+
+User identity is currently supplied through `userId` by the client.
+Authentication-based identity verification is pending.
+
 ## Folder structure
 
 ```text
@@ -279,6 +326,7 @@ src/modules/
   overstay/               # FR-5
   analytics/              # FR-6
   notification/           # FR-7 (service + reminder scheduler)
+  review/                 # FR-9 review and rating
 tests/                    # node:test unit tests, one file per FR
 docs/                     # sprint report and deviations
 ```

@@ -18,7 +18,7 @@ const parkingRoutes = require("./src/modules/parking/parking.routes");
 const subscriptionRoutes = require("./src/modules/subscription/subscription.routes");
 const subscriptionService = require("./src/modules/subscription/subscription.service");
 
-// FR-8: Review module
+// FR-9: Review module
 const reviewRoutes = require("./src/modules/review/review.routes");
 
 const app = express();
@@ -29,7 +29,7 @@ app.use(express.json());
 app.get("/api/health", (req, res) => {
   res.json({
     success: true,
-    message: "G10 Vehicle Parking System backend (FR-1 to FR-8) is running"
+    message: "G10 Vehicle Parking System backend (FR-1 to FR-9) is running"
   });
 });
 
@@ -44,7 +44,7 @@ app.use("/api/slots", slotRoutes);
 app.use("/api/parking", parkingRoutes);
 app.use("/api/subscriptions", subscriptionRoutes);
 
-// FR-8: Review routes
+// FR-9: Review routes
 app.use("/api/reviews", reviewRoutes);
 
 const PORT = process.env.PORT || 5000;
