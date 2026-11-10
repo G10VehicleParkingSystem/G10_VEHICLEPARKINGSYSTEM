@@ -1,31 +1,73 @@
+
 name: Backend CI
 
 on:
   push:
-    branches: [main, feature/fr2-fr7-final]
+    branches:
+      - main
+      - "feature/**"
+
   pull_request:
-    branches: [main]
+    branches:
+      - main
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  backend-check:
+  backend-ci:
+    name: Backend Validation
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      # 1. Checkout repository
+      - name: Checkout Code
+        uses: actions/checkout@v7
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      # 2. Set up Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
         with:
-          node-version: 20
+          node-version: 22
+          cache: npm
 
-      - name: Install dependencies
+      # 3. Install dependencies
+      - name: Install Dependencies
         run: npm ci
 
-      - name: Check JavaScript syntax
+      # 4. Lint (runs when a lint script exists)
+      - name: Run Lint Checks
+        run: npm run lint --if-present
+
+      # 5. Check JavaScript syntax
+      - name: JavaScript Syntax Check
+        shell: bash
         run: |
-          node --check server.js
-          node --check src/modules/reservation/reservation.controller.js
-          node --check src/modules/reservation/reservation.service.js
-          node --check src/modules/notification/notification.controller.js
-          node --check src/modules/notification/notification.service.js
+          mapfile -d '' files < <(
+            find . \
+              -type d \( -name node_modules -o -name .git \) -prune \
+              -o -type f -name '*.js' -print0
+          )
+
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No JavaScript files found."
+            exit 1
+          fi
+
+          for file in "${files[@]}"; do
+            echo "Checking $file"
+            node --check "$file"
+          done
+
+      # 6. Run automated tests
+      - name: Run Unit Tests
+        run: npm test
+        env:
+          CI: true

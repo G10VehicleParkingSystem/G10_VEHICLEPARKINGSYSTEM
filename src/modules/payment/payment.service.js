@@ -18,8 +18,31 @@ function validatePaymentMethod(paymentMethod) {
   }
 }
 
+async function recordFailedPayment({ userId, paymentMethod, amount, target }) {
+  const payment = await Payment.create({
+    userId,
+    ...target,
+    amount,
+    currency: "INR",
+    paymentMethod,
+    status: "FAILED",
+    transactionId: `TXN-${randomUUID()}`,
+    providerReference: "NOT_PROCESSED"
+  });
+
+  await notificationService.notifyPaymentStatus(userId, payment._id, false);
+  return payment;
+}
+
 async function recordPayment({ userId, paymentMethod, amount, target }) {
-  const gatewayResult = await processDigitalPayment({ amount, paymentMethod });
+  let gatewayResult;
+  try {
+    gatewayResult = await processDigitalPayment({ amount, paymentMethod });
+  } catch (error) {
+    await recordFailedPayment({ userId, paymentMethod, amount, target });
+    throw new Error(`Payment failed: ${error.message}`);
+  }
+
   const payment = await Payment.create({
     userId,
     ...target,
@@ -32,7 +55,11 @@ async function recordPayment({ userId, paymentMethod, amount, target }) {
     providerReference: gatewayResult.providerReference
   });
 
-  await notificationService.notifyPaymentStatus(userId, payment._id, true);
+  await notificationService.notifyPaymentStatus(
+    userId,
+    payment._id,
+    payment.status === "SUCCESS"
+  );
   return payment;
 }
 
@@ -125,6 +152,61 @@ async function payFine({ fineId, userId, paymentMethod }) {
   return payment;
 }
 
+async function payForSubscription({
+  subscriptionId,
+  userId,
+  paymentMethod,
+  amount,
+  periodStart
+}) {
+  validatePaymentMethod(paymentMethod);
+
+  const numericAmount = Number(amount);
+  const billingPeriodStart = new Date(periodStart);
+
+  if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
+    throw new Error("Subscription payment amount must be positive");
+  }
+
+  if (Number.isNaN(billingPeriodStart.getTime())) {
+    throw new Error("Invalid subscription billing period");
+  }
+
+  const paymentFilter = {
+    subscriptionId,
+    subscriptionPeriodStart: billingPeriodStart,
+    status: "SUCCESS"
+  };
+
+  // Return an existing successful payment on retry.
+  const existingPayment = await Payment.findOne(paymentFilter);
+
+  if (existingPayment) {
+    return existingPayment;
+  }
+
+  try {
+    return await recordPayment({
+      userId,
+      paymentMethod,
+      amount: numericAmount,
+      target: {
+        subscriptionId,
+        subscriptionPeriodStart: billingPeriodStart
+      }
+    });
+  } catch (error) {
+    // Handle duplicate requests and notification errors after payment creation.
+    const savedPayment = await Payment.findOne(paymentFilter);
+
+    if (savedPayment) {
+      return savedPayment;
+    }
+
+    throw error;
+  }
+}
+
 async function getUserTransactions(userId) {
   return Payment.find({ userId }).sort({ createdAt: -1 });
 }
@@ -132,5 +214,6 @@ async function getUserTransactions(userId) {
 module.exports = {
   payForReservation,
   payFine,
+  payForSubscription,
   getUserTransactions
 };

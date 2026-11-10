@@ -1,5 +1,57 @@
+const Subscription = require("../subscription/subscription.model");
 const ParkingSlot = require("./slot.model");
 const Vehicle = require("../vehicle/vehicle.model");
+
+function vehicleFitsSlot(vehicle, slot) {
+  return (
+    slot.length >= vehicle.length &&
+    slot.width >= vehicle.width &&
+    slot.height >= vehicle.height
+  );
+}
+
+async function createSlot({ slotNumber, length, width, height }) {
+  if (
+    !slotNumber ||
+    length === undefined ||
+    width === undefined ||
+    height === undefined
+  ) {
+    throw new Error("slotNumber, length, width and height are required");
+  }
+
+  if (
+    typeof length !== "number" ||
+    typeof width !== "number" ||
+    typeof height !== "number"
+  ) {
+    throw new Error("Slot dimensions must be numbers");
+  }
+
+  if (length <= 0 || width <= 0 || height <= 0) {
+    throw new Error("Slot dimensions must be greater than zero");
+  }
+
+  const existingSlot = await ParkingSlot.findOne({
+    slotNumber: slotNumber.toUpperCase()
+  });
+
+  if (existingSlot) {
+    throw new Error("Slot number already exists");
+  }
+
+  return ParkingSlot.create({
+    slotNumber: slotNumber.toUpperCase(),
+    length,
+    width,
+    height
+  });
+}
+
+async function getSlots(status) {
+  const filter = status ? { status: status.toUpperCase() } : {};
+  return ParkingSlot.find(filter).sort({ slotNumber: 1 });
+}
 
 async function recommendSlot(vehicleNumber) {
   const vehicle = await Vehicle.findOne({
@@ -12,8 +64,27 @@ async function recommendSlot(vehicleNumber) {
     throw error;
   }
 
+    const now = new Date();
+
+  const activeSubscriptions = await Subscription.find({
+    startDate: { $lte: now },
+    endDate: { $gt: now },
+    $or: [
+      { status: "ACTIVE" },
+      {
+        status: "PENDING_PAYMENT",
+        pendingExpiresAt: { $gt: now }
+      }
+    ]
+  }).select("slotId");
+
+  const reservedSlotIds = activeSubscriptions.map(
+    (subscription) => subscription.slotId
+  );
+
   const suitableSlots = await ParkingSlot.find({
     status: "AVAILABLE",
+    _id: { $nin: reservedSlotIds },
     length: { $gte: vehicle.length },
     width: { $gte: vehicle.width },
     height: { $gte: vehicle.height }
@@ -35,5 +106,8 @@ async function recommendSlot(vehicleNumber) {
 }
 
 module.exports = {
+  vehicleFitsSlot,
+  createSlot,
+  getSlots,
   recommendSlot
 };

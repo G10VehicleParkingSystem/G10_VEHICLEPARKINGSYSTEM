@@ -1,3 +1,4 @@
+
 const mongoose = require("mongoose");
 
 const paymentSchema = new mongoose.Schema(
@@ -12,6 +13,15 @@ const paymentSchema = new mongoose.Schema(
     },
     fineId: {
       type: mongoose.Schema.Types.ObjectId,
+      default: undefined
+    },
+    subscriptionId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Subscription",
+      default: undefined
+    },
+    subscriptionPeriodStart: {
+      type: Date,
       default: undefined
     },
     amount: {
@@ -56,16 +66,37 @@ paymentSchema.index(
   { reservationId: 1 },
   {
     unique: true,
-    partialFilterExpression: { reservationId: { $exists: true }, status: "SUCCESS" },
+    partialFilterExpression: {
+      reservationId: { $exists: true },
+      status: "SUCCESS"
+    },
     name: "one_successful_payment_per_reservation"
   }
 );
+
 paymentSchema.index(
   { fineId: 1 },
   {
     unique: true,
-    partialFilterExpression: { fineId: { $exists: true }, status: "SUCCESS" },
+    partialFilterExpression: {
+      fineId: { $exists: true },
+      status: "SUCCESS"
+    },
     name: "one_successful_payment_per_fine"
+  }
+);
+
+// One successful payment per subscription billing period.
+paymentSchema.index(
+  { subscriptionId: 1, subscriptionPeriodStart: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      subscriptionId: { $exists: true },
+      subscriptionPeriodStart: { $exists: true },
+      status: "SUCCESS"
+    },
+    name: "one_successful_payment_per_subscription_period"
   }
 );
 
