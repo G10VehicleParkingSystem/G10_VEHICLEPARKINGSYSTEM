@@ -2,7 +2,8 @@ import { NavLink, Link, Outlet } from "react-router-dom";
 import { PROFILES, useSession } from "./session.jsx";
 
 const STUDENT_LINKS = [
-  { to: "/", label: "Find a spot", end: true }
+  { to: "/", label: "Find a spot", end: true },
+  { to: "/bookings", label: "My bookings" }
 ];
 
 const OFFICE_LINKS = [];

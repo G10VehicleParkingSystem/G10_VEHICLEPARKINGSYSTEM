@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { get, post } from "../api.js";
 import { useSession } from "../session.jsx";
 import {
@@ -348,6 +349,7 @@ function BookSpot({ onBooked }) {
 }
 
 export default function FindSpot() {
+  const navigate = useNavigate();
   const slots = useLoad(() => get("/slots").then((d) => d.slots), []);
 
   return (
@@ -365,7 +367,7 @@ export default function FindSpot() {
           <MyVehicles />
         </div>
         <div className="stack">
-          <BookSpot onBooked={slots.reload} />
+          <BookSpot onBooked={() => navigate("/bookings")} />
           <section className="panel">
             <div className="panel-head">
               <h2>Free right now</h2>

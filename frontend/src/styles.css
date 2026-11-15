@@ -636,3 +636,57 @@ table.table {
   .ticket::before, .ticket::after { left: 88px; }
   .ticket-slot { font-size: 20px; }
 }
+
+/* ---------- Tabs & ticket list ---------- */
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 18px;
+  overflow-x: auto;
+}
+
+.tabs button {
+  background: none;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tabs button[aria-selected="true"] {
+  color: var(--navy-800);
+  border-bottom-color: var(--orange-500);
+}
+
+.tab-count {
+  display: inline-block;
+  margin-left: 6px;
+  font-size: 12px;
+  background: var(--line-soft);
+  color: var(--muted);
+  border-radius: 9px;
+  padding: 0 7px;
+}
+
+.ticket-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 500px), 1fr));
+  gap: 16px;
+}
+
+.pay-chooser {
+  margin-top: 8px;
+  padding: 12px;
+  background: var(--orange-100);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
