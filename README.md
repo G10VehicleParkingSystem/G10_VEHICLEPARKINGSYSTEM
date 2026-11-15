@@ -41,6 +41,39 @@ Run the unit tests (no database needed):
 npm test
 ```
 
+Run the end-to-end smoke test against a running server:
+
+```bash
+BASE_URL=http://localhost:5000/api node scripts/smoke-test.mjs
+```
+
+Run with Docker (MongoDB on the host):
+
+```bash
+docker build -t g10-parking .
+docker run -p 5000:5000 -e MONGO_URI=mongodb://host.docker.internal:27017/g10_vehicle_parking -e PAYMENT_GATEWAY=demo g10-parking
+```
+
+Or pull the published image:
+`docker pull ghcr.io/g10vehicleparkingsystem/g10_vehicleparkingsystem:latest`
+
+## CI/CD pipeline
+
+`.github/workflows/backend-ci.yml` runs four stages, each starting only if the one
+before it passed:
+
+| Stage | Runs on | What it does |
+|---|---|---|
+| Backend Validation | every push to `main` and `feature/**`, every PR | `npm ci`, lint, syntax check, unit tests |
+| End-to-End Test (MongoDB) | same | starts the server against a real MongoDB and runs `scripts/smoke-test.mjs` |
+| Build, Test and Publish Docker Image | same | builds the image and smoke tests the container; on `main` publishes it to GitHub Container Registry as `sha-<commit>` and `latest` |
+| Deploy to Production | `main` only | pulls the published image, verifies the release, triggers the live host and smoke tests it |
+
+To deploy to a live host (for example Render, with MongoDB Atlas), add a repository
+secret `DEPLOY_HOOK_URL` (the host's deploy hook) and a repository variable
+`PRODUCTION_URL` (the site's address). Without them the pipeline still publishes and
+verifies every release, and the live-host steps are skipped.
+
 ## Configuration
 
 | Variable | Default | Meaning |

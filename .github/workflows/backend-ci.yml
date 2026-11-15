@@ -1,5 +1,5 @@
 
-name: Backend CI
+name: Backend CI/CD
 
 on:
   push:
@@ -18,7 +18,11 @@ permissions:
 
 concurrency:
   group: backend-ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # Never cancel a deployment of main half way through.
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+env:
+  NODE_VERSION: 22
 
 jobs:
   backend-ci:
@@ -71,3 +75,240 @@ jobs:
         run: npm test
         env:
           CI: true
+
+  # CI stage 2: run the real server against a real MongoDB and walk one booking
+  # through the API (scripts/smoke-test.mjs).
+  e2e:
+    name: End-to-End Test (MongoDB)
+    needs: backend-ci
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      mongo:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.runCommand({ ping: 1 })'"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Start Backend
+        run: nohup npm start > server.log 2>&1 &
+        env:
+          PORT: 5000
+          MONGO_URI: mongodb://127.0.0.1:27017/g10_ci_e2e
+          PAYMENT_GATEWAY: demo
+
+      - name: Run End-to-End Smoke Test
+        run: node scripts/smoke-test.mjs
+        env:
+          BASE_URL: http://localhost:5000/api
+
+      - name: Show Server Log
+        if: always()
+        run: cat server.log
+
+  # CD stage 1: build the Docker image, test the image itself, and publish it to
+  # GitHub Container Registry when the change is on main.
+  docker:
+    name: Build, Test and Publish Docker Image
+    needs: e2e
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image: ${{ steps.image.outputs.name }}
+      tag: ${{ steps.image.outputs.tag }}
+
+    services:
+      mongo:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.runCommand({ ping: 1 })'"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+
+      - name: Image Name
+        id: image
+        shell: bash
+        run: |
+          echo "name=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+          echo "tag=sha-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: g10-parking:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Start Container
+        run: |
+          docker run -d --name g10-parking --network host \
+            -e PORT=5000 \
+            -e MONGO_URI=mongodb://127.0.0.1:27017/g10_ci_container \
+            -e PAYMENT_GATEWAY=demo \
+            g10-parking:test
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Smoke Test the Container
+        run: node scripts/smoke-test.mjs
+        env:
+          BASE_URL: http://localhost:5000/api
+
+      - name: Show Container Log
+        if: always()
+        run: docker logs g10-parking
+
+      - name: Log in to GitHub Container Registry
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish Image
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ steps.image.outputs.name }}:${{ steps.image.outputs.tag }}
+            ${{ steps.image.outputs.name }}:latest
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.title=G10 Vehicle Parking System backend
+          cache-from: type=gha
+
+  # CD stage 2: deploy the published image. Runs only for main. It pulls the exact image
+  # that was published, starts it and verifies it as a release check. If a hosting deploy
+  # hook is configured (repository secret DEPLOY_HOOK_URL, e.g. a Render deploy hook), it
+  # also triggers the live deployment and smoke tests the live URL (repository variable
+  # PRODUCTION_URL).
+  deploy:
+    name: Deploy to Production
+    needs: docker
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: read
+    environment:
+      name: production
+      url: ${{ steps.done.outputs.url }}
+
+    services:
+      mongo:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.runCommand({ ping: 1 })'"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull and Start the Published Image
+        env:
+          IMAGE: ${{ needs.docker.outputs.image }}:${{ needs.docker.outputs.tag }}
+        run: |
+          docker pull "$IMAGE"
+          docker run -d --name g10-parking --network host \
+            -e PORT=5000 \
+            -e MONGO_URI=mongodb://127.0.0.1:27017/g10_release_check \
+            -e PAYMENT_GATEWAY=demo \
+            "$IMAGE"
+
+      - name: Verify the Release
+        run: node scripts/smoke-test.mjs
+        env:
+          BASE_URL: http://localhost:5000/api
+
+      - name: Trigger Live Deployment
+        env:
+          DEPLOY_HOOK_URL: ${{ secrets.DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$DEPLOY_HOOK_URL" ]; then
+            echo "No DEPLOY_HOOK_URL secret set: the verified image is published, no live host to update."
+            exit 0
+          fi
+          curl -fsS -X POST "$DEPLOY_HOOK_URL" > /dev/null
+          echo "Live deployment triggered."
+
+      - name: Smoke Test the Live Site
+        if: vars.PRODUCTION_URL != ''
+        run: node scripts/smoke-test.mjs
+        env:
+          BASE_URL: ${{ vars.PRODUCTION_URL }}/api
+          SMOKE_WAIT_SECONDS: 300
+
+      - name: Deployment Summary
+        id: done
+        env:
+          IMAGE: ${{ needs.docker.outputs.image }}
+          TAG: ${{ needs.docker.outputs.tag }}
+          PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
+        run: |
+          package_url="${{ github.server_url }}/${{ github.repository }}/pkgs/container/${IMAGE##*/}"
+          echo "url=${PRODUCTION_URL:-$package_url}" >> "$GITHUB_OUTPUT"
+          {
+            echo "### Deployed ${TAG}"
+            echo ""
+            echo "- Image: \`${IMAGE}:${TAG}\` (also tagged \`latest\`)"
+            echo "- Run it: \`docker run -p 5000:5000 -e MONGO_URI=<your MongoDB> ${IMAGE}:latest\`"
+            if [ -n "$PRODUCTION_URL" ]; then echo "- Live site: ${PRODUCTION_URL}"; fi
+          } >> "$GITHUB_STEP_SUMMARY"
