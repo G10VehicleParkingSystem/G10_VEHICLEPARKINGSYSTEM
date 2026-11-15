@@ -41,6 +41,28 @@ Run the unit tests (no database needed):
 npm test
 ```
 
+## Web front end (CampusPark)
+
+The React app in `frontend/` is the student and parking-office UI: book a spot,
+check in and out, pay, monthly pass, find your vehicle, fines, alerts, and the
+office report and slot map. There is no login yet (deviation D-1), so a profile
+menu at the top right switches between demo students and the parking office.
+
+Development, with the backend already running:
+
+```bash
+cd frontend
+npm install
+API_URL=http://localhost:5000 npm run dev   # open http://localhost:5173
+```
+
+On macOS port 5000 is taken by AirPlay: start the backend with `PORT=5050` and use
+`API_URL=http://localhost:5050`.
+
+Production: `cd frontend && npm run build`, then `npm start` in the project root
+serves the app and the API together on one port. The Docker image does this for
+you.
+
 Run the end-to-end smoke test against a running server:
 
 ```bash
@@ -59,14 +81,15 @@ Or pull the published image:
 
 ## CI/CD pipeline
 
-`.github/workflows/backend-ci.yml` runs four stages, each starting only if the one
+`.github/workflows/backend-ci.yml` runs these stages, each starting only if the ones
 before it passed:
 
 | Stage | Runs on | What it does |
 |---|---|---|
 | Backend Validation | every push to `main` and `feature/**`, every PR | `npm ci`, lint, syntax check, unit tests |
+| Front End Build | same, alongside validation | builds the React app in `frontend/` and keeps it as a downloadable artifact |
 | End-to-End Test (MongoDB) | same | starts the server against a real MongoDB and runs `scripts/smoke-test.mjs` |
-| Build, Test and Publish Docker Image | same | builds the image and smoke tests the container; on `main` publishes it to GitHub Container Registry as `sha-<commit>` and `latest` |
+| Build, Test and Publish Docker Image | same | builds the image (API and web app) and smoke tests the container; on `main` publishes it to GitHub Container Registry as `sha-<commit>` and `latest` |
 | Deploy to Production | `main` only | pulls the published image, verifies the release, triggers the live host and smoke tests it |
 
 To deploy to a live host (for example Render, with MongoDB Atlas), add a repository

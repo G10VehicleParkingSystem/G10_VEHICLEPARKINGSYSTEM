@@ -76,11 +76,44 @@ jobs:
         env:
           CI: true
 
+  # Runs alongside Backend Validation: the web front end must build.
+  frontend:
+    name: Front End Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Upload Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: campuspark-web
+          path: frontend/dist
+          retention-days: 7
+
   # CI stage 2: run the real server against a real MongoDB and walk one booking
   # through the API (scripts/smoke-test.mjs).
   e2e:
     name: End-to-End Test (MongoDB)
-    needs: backend-ci
+    needs: [backend-ci, frontend]
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -189,6 +222,12 @@ jobs:
         run: node scripts/smoke-test.mjs
         env:
           BASE_URL: http://localhost:5000/api
+
+      - name: Check the Web App Is Served
+        run: |
+          curl -fsS http://localhost:5000/ | grep -q "<title>CampusPark</title>"
+          curl -fsS http://localhost:5000/bookings | grep -q "<title>CampusPark</title>"
+          echo "The container serves the CampusPark web app."
 
       - name: Show Container Log
         if: always()
