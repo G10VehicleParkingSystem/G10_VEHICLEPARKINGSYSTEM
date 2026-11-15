@@ -80,6 +80,7 @@ function BookingTicket({ booking, slot, vehicle, payment, review, isParked, relo
   const end = new Date(booking.endTime);
   const hours = Math.ceil((end - start) / 3600000);
   const started = Date.now() >= start.getTime();
+  const ended = Date.now() >= end.getTime();
   const confirmed = booking.status === "CONFIRMED";
 
   const act = async (key, fn, message) => {
@@ -97,7 +98,9 @@ function BookingTicket({ booking, slot, vehicle, payment, review, isParked, relo
       <div className="ticket-body">
         <div className="ticket-line">
           {vehicle ? <Plate number={vehicle.vehicleNumber} /> : <span className="muted small">Vehicle</span>}
-          {isParked ? <span className="tag orange">Parked now</span> : <StatusTag status={booking.status} />}
+          {isParked && <span className="tag orange">Parked now</span>}
+          {!isParked && confirmed && ended && <span className="tag warn">Time's up</span>}
+          {!isParked && !(confirmed && ended) && <StatusTag status={booking.status} />}
           {payment && <span className="tag ok">Paid {rupees(payment.amount)}</span>}
         </div>
         <div className="ticket-when">
@@ -106,7 +109,7 @@ function BookingTicket({ booking, slot, vehicle, payment, review, isParked, relo
 
         {confirmed && !paying && (
           <div className="actions" style={{ marginTop: 8 }}>
-            {!isParked && (
+            {!isParked && !ended && (
               <button type="button" className="btn btn-navy btn-sm" disabled={busy === "in"}
                 onClick={() => act("in", () => post("/parking/check-in", { reservationId: booking._id, userId: profile.id }),
                   `Checked in at ${slot?.slotNumber}. Have a good day!`)}>

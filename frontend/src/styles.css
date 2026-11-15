@@ -524,9 +524,12 @@ table.table {
 
 @media (max-width: 520px) {
   .page { padding: 20px 16px 48px; }
+  h1 { font-size: 23px; }
+  .topbar-inner { gap: 0 12px; }
+  .profile-switch select { font-size: 12px; padding: 5px 6px; }
   .topbar-inner { padding-left: 16px; padding-right: 16px; }
   .brand small { display: none; }
-  .profile-switch select { max-width: 150px; }
+  .profile-switch select { max-width: 170px; }
   .panel { padding: 16px; }
 }
 
