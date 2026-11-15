@@ -690,3 +690,40 @@ table.table {
   flex-direction: column;
   gap: 10px;
 }
+
+/* ---------- Find my vehicle ---------- */
+
+.search-row { display: flex; gap: 10px; }
+.search-row input { flex: 1; font-size: 16px; padding: 10px 12px; }
+
+.plate-button { background: none; border: 0; padding: 0; cursor: pointer; }
+.plate-button:hover .plate { border-color: var(--orange-600); }
+
+.mono { font-family: var(--mono); font-weight: 500; }
+
+.where { border-top: 4px solid var(--navy-700); }
+.where.is-parked { border-top-color: var(--orange-500); }
+
+.where-slot {
+  font-family: var(--mono);
+  font-size: 44px;
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--navy-800);
+  margin: 2px 0;
+}
+
+.where-slot.none { font-family: inherit; font-size: 26px; color: var(--muted); }
+
+/* ---------- Fines & payments ---------- */
+
+.fine-amount { font-size: 18px; font-weight: 700; }
+.fine-row .actions { flex-wrap: nowrap; }
+
+.stat-inline { display: flex; flex-direction: column; align-items: flex-end; }
+.stat-inline strong { font-size: 24px; color: var(--navy-800); }
+
+@media (max-width: 520px) {
+  .fine-row { flex-direction: column; align-items: flex-start; }
+  .stat-inline { align-items: flex-start; }
+}
