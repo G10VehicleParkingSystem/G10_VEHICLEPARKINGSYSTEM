@@ -23,6 +23,10 @@ concurrency:
 
 env:
   NODE_VERSION: 22
+  # Throwaway parking office login and token secret for the test databases below.
+  ADMIN_EMAIL: office@campuspark.test
+  ADMIN_PASSWORD: ci-office-password
+  JWT_SECRET: ci-only-jwt-secret
 
 jobs:
   backend-ci:
@@ -211,6 +215,7 @@ jobs:
             -e PORT=5000 \
             -e MONGO_URI=mongodb://127.0.0.1:27017/g10_ci_container \
             -e PAYMENT_GATEWAY=demo \
+            -e ADMIN_EMAIL -e ADMIN_PASSWORD -e JWT_SECRET \
             g10-parking:test
 
       - name: Setup Node.js
@@ -310,6 +315,7 @@ jobs:
             -e PORT=5000 \
             -e MONGO_URI=mongodb://127.0.0.1:27017/g10_release_check \
             -e PAYMENT_GATEWAY=demo \
+            -e ADMIN_EMAIL -e ADMIN_PASSWORD -e JWT_SECRET \
             "$IMAGE"
 
       - name: Verify the Release
@@ -334,6 +340,9 @@ jobs:
         env:
           BASE_URL: ${{ vars.PRODUCTION_URL }}/api
           SMOKE_WAIT_SECONDS: 300
+          # The live site's own parking office login (repository secrets).
+          ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
 
       - name: Deployment Summary
         id: done
