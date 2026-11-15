@@ -9,6 +9,7 @@ const mongoose = require("mongoose");
 
 const reservationRoutes = require("./src/modules/reservation/reservation.routes");
 const notificationRoutes = require("./src/modules/notification/notification.routes");
+const notificationReminders = require("./src/modules/notification/notification.reminders");
 const paymentRoutes = require("./src/modules/payment/payment.routes");
 const overstayRoutes = require("./src/modules/overstay/overstay.routes");
 const overstayService = require("./src/modules/overstay/overstay.service");
