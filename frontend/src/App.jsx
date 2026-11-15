@@ -1,19 +1,21 @@
-import { useEffect, useState } from "react";
-import { get } from "./api.js";
+import { Route, Routes } from "react-router-dom";
+import Layout from "./Layout.jsx";
+import FindSpot from "./pages/FindSpot.jsx";
 
 export default function App() {
-  const [status, setStatus] = useState("Checking the parking server…");
-
-  useEffect(() => {
-    get("/health")
-      .then((data) => setStatus(data.message))
-      .catch((error) => setStatus(error.message));
-  }, []);
-
   return (
-    <main style={{ padding: 24, fontFamily: "system-ui, sans-serif" }}>
-      <h1>CampusPark</h1>
-      <p>{status}</p>
-    </main>
+    <Routes>
+      <Route element={<Layout />}>
+        <Route index element={<FindSpot />} />
+        <Route
+          path="*"
+          element={
+            <main className="page">
+              <h1>Page not found</h1>
+            </main>
+          }
+        />
+      </Route>
+    </Routes>
   );
 }
