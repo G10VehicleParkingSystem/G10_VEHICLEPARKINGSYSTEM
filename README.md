@@ -45,8 +45,9 @@ npm test
 
 The React app in `frontend/` is the student and parking-office UI: book a spot,
 check in and out, pay, monthly pass, find your vehicle, fines, alerts, and the
-office report and slot map. There is no login yet (deviation D-1), so a profile
-menu at the top right switches between demo students and the parking office.
+office report and slot map. Students and faculty create an account with their
+college email and sign in; the parking office signs in with the admin account
+(see Login below) and only sees the office screens.
 
 Development, with the backend already running:
 
@@ -66,14 +67,19 @@ you.
 Run the end-to-end smoke test against a running server:
 
 ```bash
-BASE_URL=http://localhost:5000/api node scripts/smoke-test.mjs
+BASE_URL=http://localhost:5000/api ADMIN_EMAIL=... ADMIN_PASSWORD=... node scripts/smoke-test.mjs
 ```
+
+The smoke test signs in as the parking office, so pass the same `ADMIN_EMAIL` and
+`ADMIN_PASSWORD` the server was started with.
 
 Run with Docker (MongoDB on the host):
 
 ```bash
 docker build -t g10-parking .
-docker run -p 5000:5000 -e MONGO_URI=mongodb://host.docker.internal:27017/g10_vehicle_parking -e PAYMENT_GATEWAY=demo g10-parking
+docker run -p 5000:5000 -e MONGO_URI=mongodb://host.docker.internal:27017/g10_vehicle_parking \
+  -e PAYMENT_GATEWAY=demo -e JWT_SECRET=<long random value> \
+  -e ADMIN_EMAIL=office@campuspark.test -e ADMIN_PASSWORD=<office password> g10-parking
 ```
 
 Or pull the published image:
@@ -94,8 +100,12 @@ before it passed:
 
 To deploy to a live host (for example Render, with MongoDB Atlas), add a repository
 secret `DEPLOY_HOOK_URL` (the host's deploy hook) and a repository variable
-`PRODUCTION_URL` (the site's address). Without them the pipeline still publishes and
-verifies every release, and the live-host steps are skipped.
+`PRODUCTION_URL` (the site's address). Set `JWT_SECRET`, `ADMIN_EMAIL` and
+`ADMIN_PASSWORD` on the host, and add the same admin login as repository secrets
+`ADMIN_EMAIL` and `ADMIN_PASSWORD` so the pipeline can smoke test the live site.
+Without them the pipeline still publishes and verifies every release, and the
+live-host steps are skipped. The CI stages use a throwaway admin login and token
+secret set in the workflow, only for their test databases.
 
 ## Configuration
 
@@ -127,8 +137,27 @@ confirmed business price.
 
 ## API endpoints
 
-User-scoped routes take a temporary `userId` (24-character ObjectId) until
-authentication is added in Sprint 2 — see [deviation D-1](docs/DEVIATIONS.md).
+### Login and roles
+
+Every route except `/api/health` and `/api/auth/*` needs a signed-in user:
+send `Authorization: Bearer <token>`. Passwords are stored as bcrypt hashes and
+tokens are JWTs signed with `JWT_SECRET`.
+
+| Endpoint | Body | Notes |
+|---|---|---|
+| `POST /api/auth/register` | `{ "name", "email", "password", "role": "student" \| "faculty", "detail" }` | Password at least 8 characters. Sign-up can never create an admin. |
+| `POST /api/auth/login` | `{ "email", "password" }` | Returns `{ token, user }`. |
+| `GET /api/auth/me` | | The signed-in account. |
+
+The parking office (admin) account is created on start-up from `ADMIN_EMAIL` and
+`ADMIN_PASSWORD`. Only the admin can call `GET /api/analytics`, `POST /api/slots`,
+`POST /api/overstays/detect` and `POST /api/notifications`.
+
+The `userId` fields in the examples below now come from the token: for students
+and faculty any `userId` sent in the body or query is replaced by their own id,
+and `/my/:userId` style routes answer 403 for anyone else's id. The admin may name
+another user. Vehicles belong to the account that registered them
+(`GET /api/vehicles/mine`), and only the owner or the admin can look one up.
 
 ### FR-1 Vehicles and slots
 
