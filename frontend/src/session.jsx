@@ -1,77 +1,97 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { get, post, setToken, whenSignedOut } from "./api.js";
 
-// There is no login yet (deviation D-1), so the app offers a few demo profiles.
-// Each profile has its own fixed user id; the backend keys bookings, payments and
-// alerts on it. The "Parking office" profile opens the admin screens.
-export const PROFILES = [
-  { id: "a00000000000000000000001", name: "Ananya Rao", detail: "3rd year, CSE", role: "student" },
-  { id: "a00000000000000000000002", name: "Rahul Menon", detail: "2nd year, ECE", role: "student" },
-  { id: "a00000000000000000000003", name: "Dr. Kavitha Iyer", detail: "Faculty, Physics", role: "student" },
-  { id: "a000000000000000000000ff", name: "Parking office", detail: "Admin", role: "admin" }
-];
-
+// The signed-in account and its vehicles. The token is kept in localStorage so a
+// refresh does not sign you out; the server decides who you are from it.
+const STORAGE_KEY = "campuspark.auth";
 const SessionContext = createContext(null);
 
-function read(key, fallback) {
+function readAuth() {
   try {
-    const value = localStorage.getItem(key);
-    return value ? JSON.parse(value) : fallback;
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+    return saved?.token && saved?.user ? saved : null;
   } catch {
-    return fallback;
+    return null;
   }
 }
 
-function write(key, value) {
+function writeAuth(auth) {
   try {
-    localStorage.setItem(key, JSON.stringify(value));
+    if (auth) localStorage.setItem(STORAGE_KEY, JSON.stringify(auth));
+    else localStorage.removeItem(STORAGE_KEY);
   } catch {
-    // Private mode or storage disabled: the app still works for this visit.
+    // Private mode or storage disabled: you stay signed in until the tab closes.
   }
 }
+
+const initialAuth = readAuth();
+setToken(initialAuth?.token || null);
 
 export function SessionProvider({ children }) {
-  const [profileId, setProfileId] = useState(() => read("campuspark.profile", PROFILES[0].id));
-  const profile = PROFILES.find((p) => p.id === profileId) || PROFILES[0];
+  const [auth, setAuth] = useState(initialAuth);
+  const [vehicles, setVehicles] = useState([]);
+  const [expired, setExpired] = useState(false);
 
-  // The backend has no "vehicles of a user" endpoint yet, so each profile remembers
-  // the vehicles it registered on this device.
-  const vehiclesKey = `campuspark.vehicles.${profile.id}`;
-  const [vehicles, setVehicles] = useState(() => read(vehiclesKey, []));
+  const user = auth?.user || null;
+  const profile = useMemo(
+    () => user && { id: user._id, name: user.name, email: user.email, detail: user.detail, role: user.role },
+    [user]
+  );
+
+  const start = useCallback((result) => {
+    const next = { token: result.token, user: result.user };
+    setToken(next.token);
+    writeAuth(next);
+    setExpired(false);
+    setAuth(next);
+    return next.user;
+  }, []);
+
+  const signOut = useCallback(() => {
+    setToken(null);
+    writeAuth(null);
+    setVehicles([]);
+    setAuth(null);
+  }, []);
 
   useEffect(() => {
-    write("campuspark.profile", profileId);
-    setVehicles(read(`campuspark.vehicles.${profileId}`, []));
-  }, [profileId]);
+    whenSignedOut(() => {
+      signOut();
+      setExpired(true);
+    });
+  }, [signOut]);
 
-  const rememberVehicle = useCallback(
-    (vehicle) => {
-      setVehicles((current) => {
-        const next = [
-          { _id: vehicle._id, vehicleNumber: vehicle.vehicleNumber, type: vehicle.type,
-            length: vehicle.length, width: vehicle.width, height: vehicle.height },
-          ...current.filter((v) => v.vehicleNumber !== vehicle.vehicleNumber)
-        ];
-        write(vehiclesKey, next);
-        return next;
-      });
-    },
-    [vehiclesKey]
-  );
+  // Check a saved sign-in is still valid and pick up any changes to the account.
+  useEffect(() => {
+    if (!initialAuth) return;
+    get("/auth/me")
+      .then((d) => {
+        const next = { ...readAuth(), user: d.user };
+        writeAuth(next);
+        setAuth((current) => (current ? next : current));
+      })
+      .catch(() => {});
+  }, []);
 
-  const forgetVehicle = useCallback(
-    (vehicleNumber) => {
-      setVehicles((current) => {
-        const next = current.filter((v) => v.vehicleNumber !== vehicleNumber);
-        write(vehiclesKey, next);
-        return next;
-      });
-    },
-    [vehiclesKey]
-  );
+  const loadVehicles = useCallback(() => {
+    if (!user || user.role === "admin") return Promise.resolve();
+    return get("/vehicles/mine").then((d) => setVehicles(d.vehicles)).catch(() => {});
+  }, [user]);
+
+  useEffect(() => {
+    loadVehicles();
+  }, [loadVehicles]);
+
+  const signIn = useCallback((email, password) => post("/auth/login", { email, password }).then(start), [start]);
+  const register = useCallback((form) => post("/auth/register", form).then(start), [start]);
+
+  const rememberVehicle = useCallback((vehicle) => {
+    setVehicles((current) => [vehicle, ...current.filter((v) => v.vehicleNumber !== vehicle.vehicleNumber)]);
+  }, []);
 
   const value = useMemo(
-    () => ({ profile, setProfileId, vehicles, rememberVehicle, forgetVehicle }),
-    [profile, vehicles, rememberVehicle, forgetVehicle]
+    () => ({ profile, vehicles, rememberVehicle, reloadVehicles: loadVehicles, signIn, register, signOut, expired }),
+    [profile, vehicles, rememberVehicle, loadVehicles, signIn, register, signOut, expired]
   );
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;

@@ -1,6 +1,6 @@
 import { useEffect } from "react";
-import { NavLink, Link, Outlet, useLocation } from "react-router-dom";
-import { PROFILES, useSession } from "./session.jsx";
+import { NavLink, Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { useSession } from "./session.jsx";
 import { useLoad } from "./ui.jsx";
 import { loadAlerts } from "./pages/Alerts.jsx";
 
@@ -40,8 +40,15 @@ function AlertsLink({ userId }) {
 }
 
 export default function Layout() {
-  const { profile, setProfileId } = useSession();
+  const { profile, signOut } = useSession();
+  const navigate = useNavigate();
   const isOffice = profile.role === "admin";
+  const roleLabel = isOffice ? "Admin" : profile.detail || (profile.role === "faculty" ? "Faculty" : "Student");
+
+  function leave() {
+    signOut();
+    navigate("/login", { replace: true });
+  }
   const links = isOffice ? OFFICE_LINKS : STUDENT_LINKS;
 
   return (
@@ -63,16 +70,14 @@ export default function Layout() {
 
           <div className="topbar-right">
             {!isOffice && <AlertsLink userId={profile.id} />}
-            <label className="profile-switch">
-              <span className="sr-only">Signed in as</span>
-              <select value={profile.id} onChange={(e) => setProfileId(e.target.value)}>
-                {PROFILES.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name} · {p.detail}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <div className="account">
+              <span className="account-name">
+                <span className="sr-only">Signed in as </span>
+                {profile.name}
+                <small>{roleLabel}</small>
+              </span>
+              <button type="button" className="btn-signout" onClick={leave}>Sign out</button>
+            </div>
           </div>
         </div>
       </header>
@@ -80,8 +85,7 @@ export default function Layout() {
       <Outlet />
 
       <footer className="footer">
-        CampusPark · G10 Vehicle Parking System, Software Engineering mini-project. Pick a profile at the
-        top right; proper student login comes with the security work.
+        CampusPark · G10 Vehicle Parking System, Software Engineering mini-project.
       </footer>
     </>
   );
