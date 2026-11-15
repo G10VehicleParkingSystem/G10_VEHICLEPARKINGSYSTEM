@@ -538,3 +538,101 @@ table.table {
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+/* ---------- Parking ticket ---------- */
+
+.ticket {
+  display: grid;
+  grid-template-columns: 132px 1fr;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+  position: relative;
+}
+
+.ticket-stub {
+  background: var(--navy-800);
+  color: #fff;
+  border-radius: var(--radius) 0 0 var(--radius);
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-right: 2px dashed var(--paper);
+}
+
+.ticket-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #b9c4d8;
+}
+
+.ticket-slot {
+  font-family: var(--mono);
+  font-weight: 600;
+  font-size: 26px;
+  line-height: 1.15;
+  color: var(--orange-500);
+  word-break: break-all;
+}
+
+.ticket-zone { font-size: 12px; color: #d3dbea; margin-top: 2px; }
+
+.ticket-body { padding: 14px 18px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+
+.ticket-line { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+.ticket-when { font-weight: 600; font-size: 15px; }
+
+.ticket::before,
+.ticket::after {
+  content: "";
+  position: absolute;
+  left: 124px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--paper);
+  border: 1px solid var(--line);
+}
+
+.ticket::before { top: -9px; clip-path: inset(50% 0 0 0); }
+.ticket::after { bottom: -9px; clip-path: inset(0 0 50% 0); }
+
+.panel .ticket::before,
+.panel .ticket::after { background: var(--card); }
+
+/* ---------- Modal ---------- */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(12, 26, 48, 0.55);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  z-index: 40;
+}
+
+.modal {
+  background: #fff;
+  border-radius: var(--radius);
+  border-top: 4px solid var(--orange-500);
+  padding: 20px;
+  width: min(360px, 100%);
+}
+
+.qr {
+  display: block;
+  width: 220px;
+  height: 220px;
+  margin: 14px auto;
+  image-rendering: pixelated;
+}
+
+@media (max-width: 520px) {
+  .ticket { grid-template-columns: 96px 1fr; }
+  .ticket::before, .ticket::after { left: 88px; }
+  .ticket-slot { font-size: 20px; }
+}
