@@ -1,4 +1,5 @@
 const express = require("express");
+const { requireAdmin, ownUserParam } = require("../auth/auth.middleware");
 const {
   detectOverstays,
   getFines,
@@ -7,7 +8,9 @@ const {
 
 const router = express.Router();
 
-router.post("/detect", detectOverstays);
+router.param("userId", ownUserParam);
+
+router.post("/detect", requireAdmin, detectOverstays);
 router.get("/my/:userId", getFines);
 router.post("/:reservationId/checkout", checkout);
 

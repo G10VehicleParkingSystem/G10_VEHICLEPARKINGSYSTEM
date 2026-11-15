@@ -22,6 +22,11 @@ const subscriptionService = require("./src/modules/subscription/subscription.ser
 // FR-9: Review module
 const reviewRoutes = require("./src/modules/review/review.routes");
 
+// Security (D-1): accounts, login tokens and role checks
+const authRoutes = require("./src/modules/auth/auth.routes");
+const authService = require("./src/modules/auth/auth.service");
+const { requireAuth, requireAdmin, bindUser } = require("./src/modules/auth/auth.middleware");
+
 const app = express();
 
 app.use(cors());
@@ -34,19 +39,29 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// Existing module routes
-app.use("/api/reservations", reservationRoutes);
-app.use("/api/notifications", notificationRoutes);
-app.use("/api/payments", paymentRoutes);
-app.use("/api/overstays", overstayRoutes);
-app.use("/api/analytics", analyticsRoutes);
-app.use("/api/vehicles", vehicleRoutes);
-app.use("/api/slots", slotRoutes);
-app.use("/api/parking", parkingRoutes);
-app.use("/api/subscriptions", subscriptionRoutes);
+// Sign-up and sign-in are open; every other API route needs a signed-in user, whose
+// id comes from the token (bindUser) instead of a userId parameter.
+app.use("/api/auth", authRoutes);
+
+const signedIn = [requireAuth, bindUser];
+
+app.use("/api/reservations", signedIn, reservationRoutes);
+app.use("/api/notifications", signedIn, notificationRoutes);
+app.use("/api/payments", signedIn, paymentRoutes);
+app.use("/api/overstays", signedIn, overstayRoutes);
+app.use("/api/analytics", signedIn, requireAdmin, analyticsRoutes);
+app.use("/api/vehicles", signedIn, vehicleRoutes);
+app.use("/api/slots", signedIn, slotRoutes);
+app.use("/api/parking", signedIn, parkingRoutes);
+app.use("/api/subscriptions", signedIn, subscriptionRoutes);
 
 // FR-9: Review routes
-app.use("/api/reviews", reviewRoutes);
+app.use("/api/reviews", signedIn, reviewRoutes);
+
+// Unknown API paths answer in JSON rather than falling through to the web app.
+app.use("/api", (req, res) => {
+  res.status(404).json({ success: false, message: "Not found" });
+});
 
 // Web front end: serve the built React app (frontend/dist) when it exists, and send
 // every non-API path to index.html so its client-side routes work on refresh.
@@ -68,6 +83,17 @@ async function startServer() {
   try {
     await mongoose.connect(MONGO_URI);
     console.log("MongoDB connected");
+
+    // Parking office account from ADMIN_EMAIL / ADMIN_PASSWORD, if set.
+    try {
+      const admin = await authService.ensureAdmin({
+        email: process.env.ADMIN_EMAIL,
+        password: process.env.ADMIN_PASSWORD
+      });
+      if (admin) console.log(`Parking office account: ${admin.email}`);
+    } catch (error) {
+      console.error("Could not create the parking office account:", error.message);
+    }
 
     const configuredInterval = Number(
       process.env.OVERSTAY_CHECK_INTERVAL_MS || 60_000

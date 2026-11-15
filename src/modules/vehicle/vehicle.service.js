@@ -8,7 +8,8 @@ async function registerVehicle({
   type,
   length,
   width,
-  height
+  height,
+  owner
 }) {
   if (
     !vehicleNumber ||
@@ -52,7 +53,8 @@ async function registerVehicle({
     length,
     width,
     height,
-    qrToken
+    qrToken,
+    ...(owner ? { owner } : {})
   });
 
   // Generate QR code containing only the token
@@ -131,7 +133,21 @@ async function verifyVehicleQr(token) {
   };
 }
 
+async function getUserVehicles(owner) {
+  return Vehicle.find({ owner }).sort({ createdAt: -1 });
+}
+
+// Students and faculty can only look up their own vehicles; the parking office can
+// look up any. Vehicles registered before accounts existed have no owner and stay open.
+async function canSeeVehicle(vehicleNumber, user) {
+  if (user.role === "admin") return true;
+  const vehicle = await Vehicle.findOne({ vehicleNumber: String(vehicleNumber).toUpperCase() }).select("owner");
+  return !vehicle || !vehicle.owner || String(vehicle.owner) === user.id;
+}
+
 module.exports = {
+  getUserVehicles,
+  canSeeVehicle,
   registerVehicle,
   getVehicle,
   getVehicleQr,

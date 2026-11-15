@@ -3,7 +3,10 @@ const vehicleService = require("./vehicle.service");
 
 async function registerVehicle(req, res) {
   try {
-    const result = await vehicleService.registerVehicle(req.body);
+    const result = await vehicleService.registerVehicle({
+      ...req.body,
+      owner: req.user?.id
+    });
 
     return res.status(201).json({
       success: true,
@@ -83,7 +86,31 @@ async function verifyVehicleQr(req, res) {
   }
 }
 
+async function getMyVehicles(req, res) {
+  try {
+    const vehicles = await vehicleService.getUserVehicles(req.user.id);
+    return res.status(200).json({ success: true, vehicles });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+}
+
+// Route guard: refuse lookups of someone else's vehicle.
+async function ownVehicleOnly(req, res, next) {
+  try {
+    if (await vehicleService.canSeeVehicle(req.params.vehicleNumber, req.user)) return next();
+    return res.status(403).json({
+      success: false,
+      message: "This vehicle is registered to another account"
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+}
+
 module.exports = {
+  getMyVehicles,
+  ownVehicleOnly,
   registerVehicle,
   getVehicle,
   getVehicleQr,
