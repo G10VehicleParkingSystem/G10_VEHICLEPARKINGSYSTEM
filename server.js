@@ -1,6 +1,8 @@
 
 require("dotenv").config();
 
+const fs = require("fs");
+const path = require("path");
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
@@ -45,6 +47,16 @@ app.use("/api/subscriptions", subscriptionRoutes);
 
 // FR-9: Review routes
 app.use("/api/reviews", reviewRoutes);
+
+// Web front end: serve the built React app (frontend/dist) when it exists, and send
+// every non-API path to index.html so its client-side routes work on refresh.
+const frontendDist = path.join(__dirname, "frontend", "dist");
+if (fs.existsSync(path.join(frontendDist, "index.html"))) {
+  app.use(express.static(frontendDist));
+  app.get(/^\/(?!api\/).*/, (req, res) => {
+    res.sendFile(path.join(frontendDist, "index.html"));
+  });
+}
 
 const PORT = process.env.PORT || 5000;
 
