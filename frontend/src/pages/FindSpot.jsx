@@ -6,6 +6,7 @@ import {
   Empty, LoadError, Plate, VEHICLE_TYPES, formatDay, formatTime, useAction, useLoad, zoneName, zoneOf
 } from "../ui.jsx";
 import VehicleQr from "../components/VehicleQr.jsx";
+import { Stars } from "../components/Rating.jsx";
 
 // Free slots right now, grouped by zone (the letters at the start of a slot number).
 export function AvailabilityBoard({ slots }) {
@@ -222,7 +223,10 @@ function BookSpot({ onBooked }) {
       return;
     }
     const data = await run("find", () => post("/slots/recommend", { vehicleNumber: chosen.vehicleNumber }));
-    setSuggestion(data ? { slot: data.slot } : null);
+    if (!data) return setSuggestion(null);
+    // Ratings are a nice extra: a failure here shouldn't block booking.
+    const rating = await get(`/reviews/slot/${data.slot._id}`).then((d) => d.rating).catch(() => null);
+    setSuggestion({ slot: data.slot, rating });
   }
 
   async function book() {
@@ -325,6 +329,12 @@ function BookSpot({ onBooked }) {
           <div className="ticket-body">
             <div className="ticket-line">
               <Plate number={chosen.vehicleNumber} />
+              {suggestion.rating?.totalReviews > 0 && (
+                <span className="small muted">
+                  <Stars value={suggestion.rating.averageRating} /> {suggestion.rating.averageRating.toFixed(1)}
+                  {" "}({suggestion.rating.totalReviews})
+                </span>
+              )}
             </div>
             <div className="ticket-when">
               {formatDay(startAt)} · {formatTime(startAt)} to {formatTime(endAt)}

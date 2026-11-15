@@ -5,6 +5,7 @@ import { useSession } from "../session.jsx";
 import {
   Empty, LoadError, Plate, StatusTag, formatDay, formatTime, rupees, useAction, useLoad, zoneName, zoneOf
 } from "../ui.jsx";
+import { RateSlot, Stars } from "../components/Rating.jsx";
 
 export const PAYMENT_METHODS = [
   ["UPI", "UPI"],
@@ -21,10 +22,11 @@ const TABS = [
 
 // Everything the bookings screen needs, loaded together.
 async function loadBookings(userId, vehicles) {
-  const [reservations, slots, payments, parked] = await Promise.all([
+  const [reservations, slots, payments, reviews, parked] = await Promise.all([
     get(`/reservations/my/${userId}`).then((d) => d.reservations),
     get("/slots").then((d) => d.slots),
     get(`/payments/my/${userId}`).then((d) => d.transactions),
+    get(`/reviews/user/${userId}`).then((d) => d.data),
     // A vehicle whose current slot matches a confirmed booking is parked there now.
     Promise.all(
       vehicles.map((v) =>
@@ -41,6 +43,7 @@ async function loadBookings(userId, vehicles) {
     paidByReservation: Object.fromEntries(
       payments.filter((p) => p.reservationId && p.status === "SUCCESS").map((p) => [p.reservationId, p])
     ),
+    reviewByReservation: Object.fromEntries(reviews.map((r) => [r.reservationId, r])),
     parked: parked.filter(Boolean)
   };
 }
@@ -68,7 +71,7 @@ function PayChooser({ amount, busy, onPay, onCancel }) {
   );
 }
 
-function BookingTicket({ booking, slot, vehicle, payment, isParked, reload }) {
+function BookingTicket({ booking, slot, vehicle, payment, review, isParked, reload }) {
   const { profile } = useSession();
   const { busy, run } = useAction();
   const [paying, setPaying] = useState(false);
@@ -128,6 +131,16 @@ function BookingTicket({ booking, slot, vehicle, payment, isParked, reload }) {
                   "Booking cancelled. The slot is free for someone else.")}>
                 Cancel
               </button>
+            )}
+          </div>
+        )}
+
+        {booking.status === "COMPLETED" && (
+          <div className="actions" style={{ marginTop: 6 }}>
+            {review ? (
+              <span className="small muted">You rated it <Stars value={review.rating} /></span>
+            ) : (
+              <RateSlot reservationId={booking._id} onDone={reload} />
             )}
           </div>
         )}
@@ -203,6 +216,7 @@ export default function Bookings() {
               slot={data.slotById[booking.slotId]}
               vehicle={vehicleById[booking.vehicleId]}
               payment={data.paidByReservation[booking._id]}
+              review={data.reviewByReservation[booking._id]}
               isParked={data.parked.some((p) => p.vehicleId === booking.vehicleId && p.slotId === booking.slotId)}
               reload={reload}
             />

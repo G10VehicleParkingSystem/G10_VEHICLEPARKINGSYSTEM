@@ -157,7 +157,7 @@ p { margin: 0; }
   padding: 6px 8px;
   font: inherit;
   font-size: 13px;
-  max-width: 220px;
+  max-width: 260px;
 }
 
 /* ---------- Page ---------- */
@@ -727,3 +727,51 @@ table.table {
   .fine-row { flex-direction: column; align-items: flex-start; }
   .stat-inline { align-items: flex-start; }
 }
+
+/* ---------- Monthly pass ---------- */
+
+.plan { border-top: 4px solid var(--orange-500); }
+
+.plan-price {
+  font-size: 34px;
+  font-weight: 700;
+  color: var(--navy-800);
+  line-height: 1.1;
+  margin-bottom: 6px;
+}
+
+.plan-price small { font-size: 15px; font-weight: 500; color: var(--muted); }
+
+.plan-points {
+  margin: 10px 0 20px;
+  padding-left: 18px;
+  color: var(--ink);
+  font-size: 14px;
+}
+
+.plan-points li { margin: 3px 0; }
+
+.ticket.pass .ticket-stub { background: var(--orange-500); }
+.ticket.pass .ticket-label, .ticket.pass .ticket-zone { color: var(--navy-900); }
+.ticket.pass .ticket-slot { color: var(--navy-950); }
+
+/* ---------- Ratings ---------- */
+
+.stars { color: var(--orange-500); letter-spacing: 1px; }
+.stars-off { color: var(--line); }
+
+.rate-form { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+
+.star-picker { display: flex; gap: 2px; }
+
+.star-picker button {
+  background: none;
+  border: 0;
+  font-size: 26px;
+  line-height: 1;
+  color: var(--line);
+  cursor: pointer;
+  padding: 0 2px;
+}
+
+.star-picker button.on { color: var(--orange-500); }

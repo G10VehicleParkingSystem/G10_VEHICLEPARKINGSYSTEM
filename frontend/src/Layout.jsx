@@ -4,6 +4,7 @@ import { PROFILES, useSession } from "./session.jsx";
 const STUDENT_LINKS = [
   { to: "/", label: "Find a spot", end: true },
   { to: "/bookings", label: "My bookings" },
+  { to: "/pass", label: "Monthly pass" },
   { to: "/find", label: "Find my vehicle" },
   { to: "/payments", label: "Fines & payments" }
 ];
