@@ -60,18 +60,11 @@ function AddVehicle({ onAdded }) {
   async function submit(event) {
     event.preventDefault();
     const vehicleNumber = number.replace(/\s+/g, "").toUpperCase();
-    const vehicle = await run("add", async () => {
-      try {
-        const data = await post("/vehicles", { vehicleNumber, type, ...size });
-        return data.vehicle;
-      } catch (error) {
-        // Registered before (for example on another laptop): just add it to this list.
-        if (/already registered/i.test(error.message)) {
-          return (await get(`/vehicles/${encodeURIComponent(vehicleNumber)}`)).vehicle;
-        }
-        throw error;
-      }
-    }, (v) => `${v.vehicleNumber} added to your vehicles.`);
+    const vehicle = await run(
+      "add",
+      () => post("/vehicles", { vehicleNumber, type, ...size }).then((d) => d.vehicle),
+      (v) => `${v.vehicleNumber} added to your vehicles.`
+    );
 
     if (vehicle) {
       rememberVehicle(vehicle);
@@ -144,7 +137,7 @@ function AddVehicle({ onAdded }) {
 }
 
 function MyVehicles() {
-  const { vehicles, forgetVehicle } = useSession();
+  const { vehicles } = useSession();
   const [qrFor, setQrFor] = useState(null);
 
   return (
@@ -165,9 +158,6 @@ function MyVehicles() {
               <div className="actions">
                 <button type="button" className="btn btn-outline btn-sm" onClick={() => setQrFor(v.vehicleNumber)}>
                   Gate pass
-                </button>
-                <button type="button" className="btn-link small" onClick={() => forgetVehicle(v.vehicleNumber)}>
-                  Remove
                 </button>
               </div>
             </div>
