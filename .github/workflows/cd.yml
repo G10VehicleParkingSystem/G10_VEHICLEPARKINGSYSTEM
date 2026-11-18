@@ -80,6 +80,8 @@ jobs:
           tags: |
             ${{ steps.image.outputs.name }}:${{ steps.image.outputs.tag }}
             ${{ steps.image.outputs.name }}:latest
+          build-args: |
+            GIT_COMMIT=${{ env.RELEASE_SHA }}
           labels: |
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.revision=${{ env.RELEASE_SHA }}

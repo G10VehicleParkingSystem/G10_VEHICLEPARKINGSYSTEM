@@ -24,6 +24,10 @@ COPY server.js ./
 COPY src ./src
 COPY --from=frontend /frontend/dist ./frontend/dist
 
+# The commit the image was built from, reported by /api/health (set by CD).
+ARG GIT_COMMIT=dev
+ENV GIT_COMMIT=${GIT_COMMIT}
+
 USER node
 EXPOSE 5000
 
