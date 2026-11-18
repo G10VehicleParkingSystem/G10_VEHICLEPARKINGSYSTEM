@@ -33,10 +33,15 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// The commit this server was built from: Render sets RENDER_GIT_COMMIT, and the
+// published Docker image carries GIT_COMMIT. CD uses it to see when a release is live.
+const VERSION = process.env.RENDER_GIT_COMMIT || process.env.GIT_COMMIT || "dev";
+
 app.get("/api/health", (req, res) => {
   res.json({
     success: true,
-    message: "G10 Vehicle Parking System backend (FR-1 to FR-9) is running"
+    message: "G10 Vehicle Parking System backend (FR-1 to FR-9) is running",
+    version: VERSION
   });
 });
 
