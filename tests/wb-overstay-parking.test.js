@@ -47,7 +47,9 @@ function reservation(overrides = {}) {
 /* ---------- overstay.service ---------- */
 
 test("WB-OVR-01 detectOverstays fines an overdue booking and alerts the user once", async (t) => {
-  const late = reservation();
+  // A fixed clock: overdue minutes round up, so the end time must be exactly 30 min ago.
+  const now = new Date();
+  const late = reservation({ endTime: new Date(now.getTime() - 30 * 60000) });
   const alerts = [];
   let upsert;
   stubModel(t, Reservation, { find: async () => [late] });
@@ -58,7 +60,7 @@ test("WB-OVR-01 detectOverstays fines an overdue booking and alerts the user onc
   stubModel(t, ParkingSession, { findOne: async () => ({ _id: "session-1" }) });
   stubModel(t, Notification, { create: async (n) => alerts.push(n) });
 
-  const result = await overstayService.detectOverstays(new Date());
+  const result = await overstayService.detectOverstays(now);
 
   assert.equal(result.detected, 1);
   assert.equal(upsert.update.$set.sessionId, "session-1");
