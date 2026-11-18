@@ -1,73 +1,120 @@
 
-name: Backend CI
+name: G10 Vehicle Parking System CI
 
 on:
   push:
     branches:
       - main
       - "feature/**"
-
   pull_request:
     branches:
       - main
-
   workflow_dispatch:
 
 permissions:
   contents: read
 
-concurrency:
-  group: backend-ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   backend-ci:
-    name: Backend Validation
+    name: Backend Testing and Coverage
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
+
+    services:
+      mongodb:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.adminCommand(\"ping\")'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      MONGO_URI: mongodb://127.0.0.1:27017/g10_vehicle_parking_ci
+      PAYMENT_GATEWAY: demo
+      PORT: 5000
 
     steps:
-      # 1. Checkout repository
-      - name: Checkout Code
-        uses: actions/checkout@v7
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-      # 2. Set up Node.js
       - name: Setup Node.js
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
 
-      # 3. Install dependencies
       - name: Install Dependencies
         run: npm ci
 
-      # 4. Lint (runs when a lint script exists)
-      - name: Run Lint Checks
+      # Static code analysis
+      - name: Run Lint
         run: npm run lint --if-present
 
-      # 5. Check JavaScript syntax
-      - name: JavaScript Syntax Check
-        shell: bash
-        run: |
-          mapfile -d '' files < <(
-            find . \
-              -type d \( -name node_modules -o -name .git \) -prune \
-              -o -type f -name '*.js' -print0
-          )
-
-          if [ ${#files[@]} -eq 0 ]; then
-            echo "No JavaScript files found."
-            exit 1
-          fi
-
-          for file in "${files[@]}"; do
-            echo "Checking $file"
-            node --check "$file"
-          done
-
-      # 6. Run automated tests
+      # Unit tests and white-box coverage collection
       - name: Run Unit Tests
-        run: npm test
+        run: |
+          npx c8 --clean \
+            --all \
+            --include="src/**/*.js" \
+            --include="server.js" \
+            --reporter=none \
+            node --test --test-concurrency=1 tests/*.test.js
+
+      # Integration tests and additional coverage collection
+      - name: Run Integration Tests
+        run: |
+          npx c8 --no-clean \
+            --all \
+            --include="src/**/*.js" \
+            --include="server.js" \
+            --reporter=none \
+            node --test --test-concurrency=1 tests/integration/*.test.js
+
+      # Combined unit and integration coverage report
+      - name: Generate Coverage Report
+        if: always()
+        run: |
+          npx c8 report \
+            --all \
+            --include="src/**/*.js" \
+            --include="server.js" \
+            --reporter=text \
+            --reporter=lcov \
+            --reporter=html \
+            --report-dir=coverage
+
+      - name: Upload Coverage Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: g10-coverage-report
+          path: coverage/
+          if-no-files-found: warn
+          retention-days: 14
+
+      # Backend smoke testing
+      - name: Start Backend
+        if: success()
+        run: |
+          nohup npm start > server.log 2>&1 &
         env:
-          CI: true
+          PORT: 5000
+          MONGO_URI: mongodb://127.0.0.1:27017/g10_vehicle_parking_smoke
+          PAYMENT_GATEWAY: demo
+
+      - name: Run Smoke Tests
+        if: success()
+        run: node scripts/smoke-test.mjs
+        env:
+          BASE_URL: http://localhost:5000/api
+          SMOKE_WAIT_SECONDS: 60
+
+      - name: Show Backend Logs
+        if: always()
+        run: |
+          if [ -f server.log ]; then
+            cat server.log
+          fi
