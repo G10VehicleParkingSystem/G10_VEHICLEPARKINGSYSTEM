@@ -31,7 +31,7 @@ The Software Test Plan v1.0 (16-Sep-2026) was written before development. This p
 | Vehicles belong to an account | PR #50 | TC-VEH-08 (my vehicles), TC-TRK-05 / 06 (only the owner or the office can track) |
 | DEF-02 double booking fixed | this PR | TC-RES-14 added as a permanent regression test (20 parallel bookings, 3 rounds) |
 
-## New kinds of testing added in Sprint 2
+## New kinds of testing added in Sprint 3 (Testing, 16-20 Nov)
 
 - **Boundary value cases** for password length (TC-AUTH-03..05), vehicle size (TC-VEH-03, 06), booking edges (TC-RES-04..06), billing hours (TC-PAY-03) and ratings (TC-REV-02).
 - **Security input cases** for Test Plan 5.1: forged tokens (TC-SEC-02), NoSQL injection in the login (TC-SEC-09), malformed JSON (TC-SEC-10), and how passwords and payments are stored (TC-SEC-11, 12).

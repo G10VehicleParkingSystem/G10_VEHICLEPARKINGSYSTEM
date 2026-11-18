@@ -1,7 +1,7 @@
 {
   "base": "http://localhost:5099/api",
-  "run": "MWMBH2RG",
-  "finishedAt": "2026-11-18T16:09:35.503Z",
+  "run": "MWMH8R5N",
+  "finishedAt": "2026-11-18T18:51:04.445Z",
   "node": "v24.19.0",
   "summary": {
     "total": 87,
@@ -15,9 +15,9 @@
       "requirement": "VPS-NF-001",
       "title": "Slot recommendation response time",
       "runs": 20,
-      "avgMs": 5.7,
-      "p95Ms": 8.3,
-      "maxMs": 9.9,
+      "avgMs": 3.5,
+      "p95Ms": 4.8,
+      "maxMs": 5.4,
       "limitMs": 3000
     },
     {
@@ -25,9 +25,9 @@
       "requirement": "VPS-NF-001",
       "title": "Reservation response time",
       "runs": 20,
-      "avgMs": 9.1,
-      "p95Ms": 15.6,
-      "maxMs": 17.5,
+      "avgMs": 5.3,
+      "p95Ms": 6.3,
+      "maxMs": 7.4,
       "limitMs": 3000
     },
     {
@@ -35,9 +35,9 @@
       "requirement": "VPS-NF-002",
       "title": "Vehicle search response time",
       "runs": 20,
-      "avgMs": 6.6,
-      "p95Ms": 8.5,
-      "maxMs": 10.4,
+      "avgMs": 4.3,
+      "p95Ms": 5,
+      "maxMs": 5.7,
       "limitMs": 2000
     },
     {
@@ -45,9 +45,9 @@
       "requirement": "VPS-NF-003",
       "title": "Analytics report response time",
       "runs": 20,
-      "avgMs": 4.3,
-      "p95Ms": 5.3,
-      "maxMs": 5.7,
+      "avgMs": 3.1,
+      "p95Ms": 3.8,
+      "maxMs": 4.1,
       "limitMs": 5000
     }
   ],
@@ -57,22 +57,22 @@
       "requirement": "VPS-F-001",
       "technique": "EP",
       "title": "Register a student with valid details",
-      "input": "name, ananya-mwmbh2rg@college.test, 9-char password",
+      "input": "name, ananya-mwmh8r5n@college.test, 9-char password",
       "expected": "201, account returned without any password field",
       "actual": "201 Account created",
       "status": "PASS",
-      "ms": 68
+      "ms": 64
     },
     {
       "id": "TC-AUTH-02",
       "requirement": "VPS-F-001",
       "technique": "EP",
       "title": "Register with an email that is already used",
-      "input": "ananya-mwmbh2rg@college.test",
+      "input": "ananya-mwmh8r5n@college.test",
       "expected": "409 already exists",
       "actual": "409 An account with this email already exists",
       "status": "PASS",
-      "ms": 4
+      "ms": 3
     },
     {
       "id": "TC-AUTH-03",
@@ -83,7 +83,7 @@
       "expected": "400",
       "actual": "400 Password must be at least 8 characters",
       "status": "PASS",
-      "ms": 1
+      "ms": 2
     },
     {
       "id": "TC-AUTH-04",
@@ -94,7 +94,7 @@
       "expected": "201",
       "actual": "201 Account created",
       "status": "PASS",
-      "ms": 64
+      "ms": 62
     },
     {
       "id": "TC-AUTH-05",
@@ -134,11 +134,11 @@
       "requirement": "VPS-F-001",
       "technique": "EP",
       "title": "Sign in with the correct password",
-      "input": "ananya-mwmbh2rg@college.test",
+      "input": "ananya-mwmh8r5n@college.test",
       "expected": "200 with a token",
       "actual": "200 Signed in",
       "status": "PASS",
-      "ms": 64
+      "ms": 61
     },
     {
       "id": "TC-AUTH-09",
@@ -149,7 +149,7 @@
       "expected": "401 'Email or password is incorrect'",
       "actual": "401 Email or password is incorrect",
       "status": "PASS",
-      "ms": 63
+      "ms": 61
     },
     {
       "id": "TC-AUTH-10",
@@ -160,7 +160,7 @@
       "expected": "401 with the same message as a wrong password",
       "actual": "401 Email or password is incorrect",
       "status": "PASS",
-      "ms": 3
+      "ms": 2
     },
     {
       "id": "TC-AUTH-11",
@@ -171,7 +171,7 @@
       "expected": "201, role faculty",
       "actual": "201 Account created",
       "status": "PASS",
-      "ms": 63
+      "ms": 61
     },
     {
       "id": "TC-SEC-01",
@@ -281,29 +281,29 @@
       "expected": "4xx, server keeps running",
       "actual": "400, server alive: true",
       "status": "PASS",
-      "ms": 4
+      "ms": 3
     },
     {
       "id": "TC-VEH-01",
       "requirement": "VPS-F-002",
       "technique": "EP",
       "title": "Register a car with valid details",
-      "input": "KA01MWMBH2RG, CAR 4.5 x 1.8 x 1.5",
+      "input": "KA01MWMH8R5N, CAR 4.5 x 1.8 x 1.5",
       "expected": "201 with a QR gate pass image",
       "actual": "201 Vehicle registered successfully",
       "status": "PASS",
-      "ms": 51
+      "ms": 50
     },
     {
       "id": "TC-VEH-02",
       "requirement": "VPS-F-002",
       "technique": "EP",
       "title": "Register the same number again",
-      "input": "KA01MWMBH2RG",
+      "input": "KA01MWMH8R5N",
       "expected": "400 already registered",
       "actual": "400 Vehicle is already registered",
       "status": "PASS",
-      "ms": 4
+      "ms": 3
     },
     {
       "id": "TC-VEH-03",
@@ -347,7 +347,7 @@
       "expected": "201",
       "actual": "201 Vehicle registered successfully",
       "status": "PASS",
-      "ms": 45
+      "ms": 43
     },
     {
       "id": "TC-VEH-07",
@@ -358,7 +358,7 @@
       "expected": "400",
       "actual": "400 Vehicle validation failed: type: `PLANE` is not a valid enum value for path `type`.",
       "status": "PASS",
-      "ms": 2
+      "ms": 3
     },
     {
       "id": "TC-VEH-08",
@@ -366,7 +366,7 @@
       "technique": "EP",
       "title": "My vehicles lists only my own",
       "input": "GET /vehicles/mine as A",
-      "expected": "contains KA01MWMBH2RG, not B's vehicle",
+      "expected": "contains KA01MWMH8R5N, not B's vehicle",
       "actual": "200",
       "status": "PASS",
       "ms": 3
@@ -387,20 +387,20 @@
       "requirement": "VPS-F-003",
       "technique": "EP",
       "title": "Car gets the smallest slot it fits, not the large one",
-      "input": "KA01MWMBH2RG with free slots S (5 m) and L (20 m)",
-      "expected": "SMWMBH2RG",
-      "actual": "200 SMWMBH2RG",
+      "input": "KA01MWMH8R5N with free slots S (5 m) and L (20 m)",
+      "expected": "SMWMH8R5N",
+      "actual": "200 SMWMH8R5N",
       "status": "PASS",
-      "ms": 5
+      "ms": 4
     },
     {
       "id": "TC-SLOT-02",
       "requirement": "VPS-F-003",
       "technique": "EP",
       "title": "Two-wheeler gets a two-wheeler bay",
-      "input": "KA02BMWMBH2RG BIKE 2 x 0.8 x 1.2",
+      "input": "KA02BMWMH8R5N BIKE 2 x 0.8 x 1.2",
       "expected": "a slot no bigger than the bike bay",
-      "actual": "200 TWMWMBH2RG",
+      "actual": "200 TWMWMH8R5N",
       "status": "PASS",
       "ms": 6
     },
@@ -411,9 +411,9 @@
       "title": "Vehicle exactly the size of a slot fits it",
       "input": "5 x 2.5 x 2.2 vehicle, 5 x 2.5 x 2.2 slot",
       "expected": "200, a slot at least that size",
-      "actual": "200 SMWMBH2RG",
+      "actual": "200 SMWMH8R5N",
       "status": "PASS",
-      "ms": 5
+      "ms": 4
     },
     {
       "id": "TC-SLOT-04",
@@ -446,7 +446,7 @@
       "expected": "404",
       "actual": "404 Vehicle not found",
       "status": "PASS",
-      "ms": 3
+      "ms": 2
     },
     {
       "id": "TC-SLOT-07",
@@ -464,11 +464,11 @@
       "requirement": "VPS-F-004",
       "technique": "EP",
       "title": "Book a free slot for one hour",
-      "input": "KA01MWMBH2RG in SMWMBH2RG, +10 to +70 min",
+      "input": "KA01MWMH8R5N in SMWMH8R5N, +10 to +70 min",
       "expected": "201 CONFIRMED",
       "actual": "201 Parking slot reserved successfully",
       "status": "PASS",
-      "ms": 9
+      "ms": 8
     },
     {
       "id": "TC-RES-02",
@@ -490,7 +490,7 @@
       "expected": "400 already reserved",
       "actual": "400 This parking slot is already reserved for the selected time",
       "status": "PASS",
-      "ms": 6
+      "ms": 5
     },
     {
       "id": "TC-RES-04",
@@ -512,7 +512,7 @@
       "expected": "201 (touching is not overlapping)",
       "actual": "201 Parking slot reserved successfully",
       "status": "PASS",
-      "ms": 7
+      "ms": 6
     },
     {
       "id": "TC-RES-06",
@@ -534,7 +534,7 @@
       "expected": "400",
       "actual": "400 Reservation cannot start in the past",
       "status": "PASS",
-      "ms": 3
+      "ms": 2
     },
     {
       "id": "TC-RES-08",
@@ -556,7 +556,7 @@
       "expected": "400",
       "actual": "400 slotId is not a valid id",
       "status": "PASS",
-      "ms": 2
+      "ms": 1
     },
     {
       "id": "TC-RES-10",
@@ -567,7 +567,7 @@
       "expected": "200 CANCELLED",
       "actual": "200 Reservation cancelled successfully",
       "status": "PASS",
-      "ms": 13
+      "ms": 11
     },
     {
       "id": "TC-RES-11",
@@ -578,7 +578,7 @@
       "expected": "400 already cancelled",
       "actual": "400 Reservation is already cancelled",
       "status": "PASS",
-      "ms": 2
+      "ms": 3
     },
     {
       "id": "TC-RES-12",
@@ -611,7 +611,7 @@
       "expected": "exactly one 201 per round",
       "actual": "bookings confirmed per round: 1, 1, 1",
       "status": "PASS",
-      "ms": 487
+      "ms": 371
     },
     {
       "id": "TC-RES-15",
@@ -622,7 +622,7 @@
       "expected": "booking stored under A",
       "actual": "201, owner A",
       "status": "PASS",
-      "ms": 13
+      "ms": 7
     },
     {
       "id": "TC-TRK-01",
@@ -633,18 +633,18 @@
       "expected": "201 ACTIVE",
       "actual": "201 Vehicle checked in successfully",
       "status": "PASS",
-      "ms": 12
+      "ms": 6
     },
     {
       "id": "TC-TRK-02",
       "requirement": "VPS-F-009",
       "technique": "EP",
       "title": "Find my vehicle while it is parked",
-      "input": "KA01MWMBH2RG",
-      "expected": "current slot SMWMBH2RG",
-      "actual": "200 SMWMBH2RG",
+      "input": "KA01MWMH8R5N",
+      "expected": "current slot SMWMH8R5N",
+      "actual": "200 SMWMH8R5N",
       "status": "PASS",
-      "ms": 18
+      "ms": 10
     },
     {
       "id": "TC-TRK-03",
@@ -655,18 +655,18 @@
       "expected": "400 already checked in",
       "actual": "400 Reservation is already checked in",
       "status": "PASS",
-      "ms": 6
+      "ms": 3
     },
     {
       "id": "TC-TRK-04",
       "requirement": "VPS-F-009",
       "technique": "EP",
       "title": "Track an unregistered vehicle",
-      "input": "ZZ00MWMBH2RG",
+      "input": "ZZ00MWMH8R5N",
       "expected": "404",
       "actual": "404 Vehicle not found",
       "status": "PASS",
-      "ms": 4
+      "ms": 3
     },
     {
       "id": "TC-TRK-05",
@@ -677,7 +677,7 @@
       "expected": "403",
       "actual": "403 This vehicle is registered to another account",
       "status": "PASS",
-      "ms": 4
+      "ms": 2
     },
     {
       "id": "TC-TRK-06",
@@ -688,7 +688,7 @@
       "expected": "200",
       "actual": "200 Vehicle tracking details retrieved successfully",
       "status": "PASS",
-      "ms": 7
+      "ms": 5
     },
     {
       "id": "TC-PAY-01",
@@ -699,7 +699,7 @@
       "expected": "201 SUCCESS, Rs 50",
       "actual": "201 SUCCESS Rs 50",
       "status": "PASS",
-      "ms": 9
+      "ms": 6
     },
     {
       "id": "TC-PAY-02",
@@ -710,7 +710,7 @@
       "expected": "same transaction returned, not charged twice",
       "actual": "201 same transaction",
       "status": "PASS",
-      "ms": 7
+      "ms": 3
     },
     {
       "id": "TC-PAY-03",
@@ -721,7 +721,7 @@
       "expected": "Rs 100",
       "actual": "201 Rs 100",
       "status": "PASS",
-      "ms": 8
+      "ms": 5
     },
     {
       "id": "TC-PAY-04",
@@ -743,7 +743,7 @@
       "expected": "400",
       "actual": "400 Only confirmed reservations can be paid",
       "status": "PASS",
-      "ms": 5
+      "ms": 3
     },
     {
       "id": "TC-PAY-06",
@@ -754,7 +754,7 @@
       "expected": "200 with both payments",
       "actual": "200",
       "status": "PASS",
-      "ms": 4
+      "ms": 3
     },
     {
       "id": "TC-OVER-01",
@@ -765,7 +765,7 @@
       "expected": "detected >= 1",
       "actual": "200 detected 1",
       "status": "PASS",
-      "ms": 75
+      "ms": 67
     },
     {
       "id": "TC-FINE-01",
@@ -776,7 +776,7 @@
       "expected": "overdueMinutes >= 90, fine Rs 200, UNPAID",
       "actual": "91 min, Rs 200, UNPAID",
       "status": "PASS",
-      "ms": 4
+      "ms": 2
     },
     {
       "id": "TC-FINE-02",
@@ -787,7 +787,7 @@
       "expected": "400",
       "actual": "400 Overstay fine can be paid after checkout",
       "status": "PASS",
-      "ms": 4
+      "ms": 3
     },
     {
       "id": "TC-FINE-03",
@@ -798,7 +798,7 @@
       "expected": "200 checkout with fine Rs 200, then 201 SUCCESS Rs 200",
       "actual": "checkout 200 fine Rs 200; pay 201 Rs 200",
       "status": "PASS",
-      "ms": 12
+      "ms": 9
     },
     {
       "id": "TC-FINE-04",
@@ -809,7 +809,7 @@
       "expected": "400 fine not found",
       "actual": "400 Fine not found",
       "status": "PASS",
-      "ms": 3
+      "ms": 2
     },
     {
       "id": "TC-OVER-02",
@@ -820,18 +820,18 @@
       "expected": "200 COMPLETED, no fine",
       "actual": "200 COMPLETED, fine none",
       "status": "PASS",
-      "ms": 6
+      "ms": 4
     },
     {
       "id": "TC-HIST-01",
       "requirement": "VPS-F-010",
       "technique": "ST",
       "title": "After checkout the visit appears in parking history",
-      "input": "KA01MWMBH2RG",
+      "input": "KA01MWMH8R5N",
       "expected": "no current slot, 1 visit in history",
       "actual": "current none, history 1",
       "status": "PASS",
-      "ms": 5
+      "ms": 4
     },
     {
       "id": "TC-ANA-01",
@@ -842,7 +842,7 @@
       "expected": "200 with occupancy, peak hours, vehicle types, revenue",
       "actual": "200",
       "status": "PASS",
-      "ms": 4
+      "ms": 3
     },
     {
       "id": "TC-NTF-01",
@@ -853,7 +853,7 @@
       "expected": "RESERVATION_CONFIRMED and PAYMENT_SUCCESS present",
       "actual": "PAYMENT_SUCCESS, RESERVATION_CONFIRMED",
       "status": "PASS",
-      "ms": 3
+      "ms": 1
     },
     {
       "id": "TC-NTF-02",
@@ -864,7 +864,7 @@
       "expected": "OVERSTAY present",
       "actual": "PAYMENT_SUCCESS, OVERSTAY, RESERVATION_CONFIRMED",
       "status": "PASS",
-      "ms": 4
+      "ms": 2
     },
     {
       "id": "TC-NTF-03",
@@ -875,7 +875,7 @@
       "expected": "200 isRead true",
       "actual": "200",
       "status": "PASS",
-      "ms": 6
+      "ms": 5
     },
     {
       "id": "TC-NTF-04",
@@ -886,7 +886,7 @@
       "expected": "404",
       "actual": "404 Notification not found",
       "status": "PASS",
-      "ms": 16
+      "ms": 5
     },
     {
       "id": "TC-SUB-01",
@@ -897,7 +897,7 @@
       "expected": "201 ACTIVE for one month",
       "actual": "201 Monthly parking subscription activated successfully",
       "status": "PASS",
-      "ms": 16
+      "ms": 10
     },
     {
       "id": "TC-SUB-02",
@@ -908,7 +908,7 @@
       "expected": "200 cancelAtPeriodEnd true",
       "actual": "200 Subscription scheduled for cancellation at period end",
       "status": "PASS",
-      "ms": 6
+      "ms": 4
     },
     {
       "id": "TC-REV-01",
@@ -919,7 +919,7 @@
       "expected": "201",
       "actual": "201 Review submitted successfully",
       "status": "PASS",
-      "ms": 5
+      "ms": 4
     },
     {
       "id": "TC-REV-02",
@@ -941,7 +941,7 @@
       "expected": "409",
       "actual": "409 A review already exists for this reservation",
       "status": "PASS",
-      "ms": 6
+      "ms": 5
     },
     {
       "id": "TC-SEC-11",
@@ -972,7 +972,7 @@
       "title": "Slot recommendation response time",
       "input": "20 requests",
       "expected": "every response under 3 s",
-      "actual": "avg 5.7 ms, p95 8.3 ms, max 9.9 ms",
+      "actual": "avg 3.5 ms, p95 4.8 ms, max 5.4 ms",
       "status": "PASS",
       "ms": 0
     },
@@ -983,7 +983,7 @@
       "title": "Reservation response time",
       "input": "20 requests",
       "expected": "every response under 3 s",
-      "actual": "avg 9.1 ms, p95 15.6 ms, max 17.5 ms",
+      "actual": "avg 5.3 ms, p95 6.3 ms, max 7.4 ms",
       "status": "PASS",
       "ms": 0
     },
@@ -994,7 +994,7 @@
       "title": "Vehicle search response time",
       "input": "20 requests",
       "expected": "every response under 2 s",
-      "actual": "avg 6.6 ms, p95 8.5 ms, max 10.4 ms",
+      "actual": "avg 4.3 ms, p95 5.0 ms, max 5.7 ms",
       "status": "PASS",
       "ms": 0
     },
@@ -1005,7 +1005,7 @@
       "title": "Analytics report response time",
       "input": "20 requests",
       "expected": "every response under 5 s",
-      "actual": "avg 4.3 ms, p95 5.3 ms, max 5.7 ms",
+      "actual": "avg 3.1 ms, p95 3.8 ms, max 4.1 ms",
       "status": "PASS",
       "ms": 0
     }

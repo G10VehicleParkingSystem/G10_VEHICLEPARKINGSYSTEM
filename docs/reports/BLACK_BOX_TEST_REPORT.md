@@ -1,6 +1,6 @@
 # Black-Box Test Report
 
-G10 Vehicle Parking System · generated on 2026-11-18 from commit `d51b8d5`.
+G10 Vehicle Parking System · generated on 2026-11-18 from commit `cdcd871`.
 
 ## 1. Purpose and approach
 
@@ -36,10 +36,10 @@ Each operation was called 20 times in a row against the local server.
 
 | ID | Requirement | Operation | Average | 95th percentile | Slowest | Target | Result |
 |---|---|---|---|---|---|---|---|
-| TC-PERF-01 | VPS-NF-001 | Slot recommendation | 5.7 ms | 8.3 ms | 9.9 ms | under 3 s | ✅ Pass |
-| TC-PERF-02 | VPS-NF-001 | Reservation | 9.1 ms | 15.6 ms | 17.5 ms | under 3 s | ✅ Pass |
-| TC-PERF-03 | VPS-NF-002 | Vehicle search | 6.6 ms | 8.5 ms | 10.4 ms | under 2 s | ✅ Pass |
-| TC-PERF-04 | VPS-NF-003 | Analytics report | 4.3 ms | 5.3 ms | 5.7 ms | under 5 s | ✅ Pass |
+| TC-PERF-01 | VPS-NF-001 | Slot recommendation | 3.5 ms | 4.8 ms | 5.4 ms | under 3 s | ✅ Pass |
+| TC-PERF-02 | VPS-NF-001 | Reservation | 5.3 ms | 6.3 ms | 7.4 ms | under 3 s | ✅ Pass |
+| TC-PERF-03 | VPS-NF-002 | Vehicle search | 4.3 ms | 5 ms | 5.7 ms | under 2 s | ✅ Pass |
+| TC-PERF-04 | VPS-NF-003 | Analytics report | 3.1 ms | 3.8 ms | 4.1 ms | under 5 s | ✅ Pass |
 
 These were measured on a single developer laptop with a small dataset, so they show the API is well inside its targets. They are not a load test.
 
@@ -49,14 +49,14 @@ These were measured on a single developer laptop with a small dataset, so they s
 
 | ID | Requirement | Technique | Test | Input | Expected | Actual | Result |
 |---|---|---|---|---|---|---|---|
-| TC-AUTH-01 | VPS-F-001 | EP | Register a student with valid details | name, ananya-mwmbh2rg@college.test, 9-char password | 201, account returned without any password field | 201 Account created | ✅ Pass |
-| TC-AUTH-02 | VPS-F-001 | EP | Register with an email that is already used | ananya-mwmbh2rg@college.test | 409 already exists | 409 An account with this email already exists | ✅ Pass |
+| TC-AUTH-01 | VPS-F-001 | EP | Register a student with valid details | name, ananya-mwmh8r5n@college.test, 9-char password | 201, account returned without any password field | 201 Account created | ✅ Pass |
+| TC-AUTH-02 | VPS-F-001 | EP | Register with an email that is already used | ananya-mwmh8r5n@college.test | 409 already exists | 409 An account with this email already exists | ✅ Pass |
 | TC-AUTH-03 | VPS-F-001 | BVA | Password one below the minimum (7 characters) | password '1234567' | 400 | 400 Password must be at least 8 characters | ✅ Pass |
 | TC-AUTH-04 | VPS-F-001 | BVA | Password exactly at the minimum (8 characters) | password '12345678' | 201 | 201 Account created | ✅ Pass |
 | TC-AUTH-05 | VPS-F-001 | BVA | Password above the maximum (73 characters) | 73 x 'a' | 400 | 400 Password must be at most 72 characters | ✅ Pass |
 | TC-AUTH-06 | VPS-F-001 | EP | Register with an invalid email | 'not-an-email' | 400 | 400 A valid email is required | ✅ Pass |
 | TC-AUTH-07 | VPS-F-001 | EP | Sign-up cannot create an administrator | role 'admin' | 400 | 400 Role must be student or faculty | ✅ Pass |
-| TC-AUTH-08 | VPS-F-001 | EP | Sign in with the correct password | ananya-mwmbh2rg@college.test | 200 with a token | 200 Signed in | ✅ Pass |
+| TC-AUTH-08 | VPS-F-001 | EP | Sign in with the correct password | ananya-mwmh8r5n@college.test | 200 with a token | 200 Signed in | ✅ Pass |
 | TC-AUTH-09 | VPS-F-001 | EP | Sign in with a wrong password | wrong password | 401 'Email or password is incorrect' | 401 Email or password is incorrect | ✅ Pass |
 | TC-AUTH-10 | VPS-F-001 | EP | Unknown email gets the same message (no account enumeration) | nobody@college.test | 401 with the same message as a wrong password | 401 Email or password is incorrect | ✅ Pass |
 | TC-AUTH-11 | VPS-F-001 | EP | Register a faculty member | role 'faculty' | 201, role faculty | 201 Account created | ✅ Pass |
@@ -82,23 +82,23 @@ These were measured on a single developer laptop with a small dataset, so they s
 
 | ID | Requirement | Technique | Test | Input | Expected | Actual | Result |
 |---|---|---|---|---|---|---|---|
-| TC-VEH-01 | VPS-F-002 | EP | Register a car with valid details | KA01MWMBH2RG, CAR 4.5 x 1.8 x 1.5 | 201 with a QR gate pass image | 201 Vehicle registered successfully | ✅ Pass |
-| TC-VEH-02 | VPS-F-002 | EP | Register the same number again | KA01MWMBH2RG | 400 already registered | 400 Vehicle is already registered | ✅ Pass |
+| TC-VEH-01 | VPS-F-002 | EP | Register a car with valid details | KA01MWMH8R5N, CAR 4.5 x 1.8 x 1.5 | 201 with a QR gate pass image | 201 Vehicle registered successfully | ✅ Pass |
+| TC-VEH-02 | VPS-F-002 | EP | Register the same number again | KA01MWMH8R5N | 400 already registered | 400 Vehicle is already registered | ✅ Pass |
 | TC-VEH-03 | VPS-F-002 | BVA | Vehicle with length 0 (on the boundary) | length 0 | 400 | 400 Vehicle dimensions must be greater than zero | ✅ Pass |
 | TC-VEH-04 | VPS-F-002 | BVA | Vehicle with length -1 (below) | length -1 | 400 | 400 Vehicle dimensions must be greater than zero | ✅ Pass |
 | TC-VEH-05 | VPS-F-002 | EP | Vehicle with length as text | length "4.5" | 400 | 400 Vehicle dimensions must be numbers | ✅ Pass |
 | TC-VEH-06 | VPS-F-002 | BVA | Vehicle with the smallest positive size (0.1 m) | 0.1 x 0.1 x 0.1 | 201 | 201 Vehicle registered successfully | ✅ Pass |
 | TC-VEH-07 | VPS-F-002 | EP | Vehicle type outside the allowed list | type 'PLANE' | 400 | 400 Vehicle validation failed: type: `PLANE` is not a valid enum value for path `type`. | ✅ Pass |
-| TC-VEH-08 | VPS-F-002 | EP | My vehicles lists only my own | GET /vehicles/mine as A | contains KA01MWMBH2RG, not B's vehicle | 200 | ✅ Pass |
+| TC-VEH-08 | VPS-F-002 | EP | My vehicles lists only my own | GET /vehicles/mine as A | contains KA01MWMH8R5N, not B's vehicle | 200 | ✅ Pass |
 | TC-VEH-09 | VPS-F-002 | EP | Scan an invalid QR gate pass | token 'not-a-real-token' | 400 | 400 Invalid QR code or vehicle not found | ✅ Pass |
 
 ### Slot recommendation (VPS-F-003)
 
 | ID | Requirement | Technique | Test | Input | Expected | Actual | Result |
 |---|---|---|---|---|---|---|---|
-| TC-SLOT-01 | VPS-F-003 | EP | Car gets the smallest slot it fits, not the large one | KA01MWMBH2RG with free slots S (5 m) and L (20 m) | SMWMBH2RG | 200 SMWMBH2RG | ✅ Pass |
-| TC-SLOT-02 | VPS-F-003 | EP | Two-wheeler gets a two-wheeler bay | KA02BMWMBH2RG BIKE 2 x 0.8 x 1.2 | a slot no bigger than the bike bay | 200 TWMWMBH2RG | ✅ Pass |
-| TC-SLOT-03 | VPS-F-003 | BVA | Vehicle exactly the size of a slot fits it | 5 x 2.5 x 2.2 vehicle, 5 x 2.5 x 2.2 slot | 200, a slot at least that size | 200 SMWMBH2RG | ✅ Pass |
+| TC-SLOT-01 | VPS-F-003 | EP | Car gets the smallest slot it fits, not the large one | KA01MWMH8R5N with free slots S (5 m) and L (20 m) | SMWMH8R5N | 200 SMWMH8R5N | ✅ Pass |
+| TC-SLOT-02 | VPS-F-003 | EP | Two-wheeler gets a two-wheeler bay | KA02BMWMH8R5N BIKE 2 x 0.8 x 1.2 | a slot no bigger than the bike bay | 200 TWMWMH8R5N | ✅ Pass |
+| TC-SLOT-03 | VPS-F-003 | BVA | Vehicle exactly the size of a slot fits it | 5 x 2.5 x 2.2 vehicle, 5 x 2.5 x 2.2 slot | 200, a slot at least that size | 200 SMWMH8R5N | ✅ Pass |
 | TC-SLOT-04 | VPS-F-003 | EP | Vehicle too big for every slot | TRUCK 500 m long | 404 no suitable slot | 404 No suitable parking slot is currently available | ✅ Pass |
 | TC-SLOT-05 | VPS-F-003 | EP | Recommendation without a vehicle number | {} | 400 | 400 vehicleNumber is required | ✅ Pass |
 | TC-SLOT-06 | VPS-F-003 | EP | Recommendation for an unknown vehicle | ZZ99UNKNOWN | 404 | 404 Vehicle not found | ✅ Pass |
@@ -108,7 +108,7 @@ These were measured on a single developer laptop with a small dataset, so they s
 
 | ID | Requirement | Technique | Test | Input | Expected | Actual | Result |
 |---|---|---|---|---|---|---|---|
-| TC-RES-01 | VPS-F-004 | EP | Book a free slot for one hour | KA01MWMBH2RG in SMWMBH2RG, +10 to +70 min | 201 CONFIRMED | 201 Parking slot reserved successfully | ✅ Pass |
+| TC-RES-01 | VPS-F-004 | EP | Book a free slot for one hour | KA01MWMH8R5N in SMWMH8R5N, +10 to +70 min | 201 CONFIRMED | 201 Parking slot reserved successfully | ✅ Pass |
 | TC-RES-02 | VPS-F-005 | EP | View my reservations | GET /reservations/my/<A> | 200 and contains the new booking | 200 | ✅ Pass |
 | TC-RES-03 | VPS-F-006 | EP | Overlapping booking of the same slot | +20 to +40 min (inside the first booking) | 400 already reserved | 400 This parking slot is already reserved for the selected time | ✅ Pass |
 | TC-RES-04 | VPS-F-006 | BVA | Booking that overlaps by one minute at the end | +69 to +100 min | 400 | 400 This parking slot is already reserved for the selected time | ✅ Pass |
@@ -129,12 +129,12 @@ These were measured on a single developer laptop with a small dataset, so they s
 | ID | Requirement | Technique | Test | Input | Expected | Actual | Result |
 |---|---|---|---|---|---|---|---|
 | TC-TRK-01 | VPS-F-009 | ST | Check in to a confirmed booking | POST /parking/check-in | 201 ACTIVE | 201 Vehicle checked in successfully | ✅ Pass |
-| TC-TRK-02 | VPS-F-009 | EP | Find my vehicle while it is parked | KA01MWMBH2RG | current slot SMWMBH2RG | 200 SMWMBH2RG | ✅ Pass |
+| TC-TRK-02 | VPS-F-009 | EP | Find my vehicle while it is parked | KA01MWMH8R5N | current slot SMWMH8R5N | 200 SMWMH8R5N | ✅ Pass |
 | TC-TRK-03 | VPS-F-009 | ST | Check in twice | same booking | 400 already checked in | 400 Reservation is already checked in | ✅ Pass |
-| TC-TRK-04 | VPS-F-009 | EP | Track an unregistered vehicle | ZZ00MWMBH2RG | 404 | 404 Vehicle not found | ✅ Pass |
+| TC-TRK-04 | VPS-F-009 | EP | Track an unregistered vehicle | ZZ00MWMH8R5N | 404 | 404 Vehicle not found | ✅ Pass |
 | TC-TRK-05 | VPS-F-009 / 5.1 | DT | Track another student's vehicle | B tracks A's car | 403 | 403 This vehicle is registered to another account | ✅ Pass |
 | TC-TRK-06 | VPS-F-009 | DT | Parking office tracks any vehicle | office tracks A's car | 200 | 200 Vehicle tracking details retrieved successfully | ✅ Pass |
-| TC-HIST-01 | VPS-F-010 | ST | After checkout the visit appears in parking history | KA01MWMBH2RG | no current slot, 1 visit in history | current none, history 1 | ✅ Pass |
+| TC-HIST-01 | VPS-F-010 | ST | After checkout the visit appears in parking history | KA01MWMH8R5N | no current slot, 1 visit in history | current none, history 1 | ✅ Pass |
 
 ### Payments (VPS-F-007, F-008)
 
@@ -192,10 +192,10 @@ These were measured on a single developer laptop with a small dataset, so they s
 
 | ID | Requirement | Technique | Test | Input | Expected | Actual | Result |
 |---|---|---|---|---|---|---|---|
-| TC-PERF-01 | VPS-NF-001 | PERF | Slot recommendation response time | 20 requests | every response under 3 s | avg 5.7 ms, p95 8.3 ms, max 9.9 ms | ✅ Pass |
-| TC-PERF-02 | VPS-NF-001 | PERF | Reservation response time | 20 requests | every response under 3 s | avg 9.1 ms, p95 15.6 ms, max 17.5 ms | ✅ Pass |
-| TC-PERF-03 | VPS-NF-002 | PERF | Vehicle search response time | 20 requests | every response under 2 s | avg 6.6 ms, p95 8.5 ms, max 10.4 ms | ✅ Pass |
-| TC-PERF-04 | VPS-NF-003 | PERF | Analytics report response time | 20 requests | every response under 5 s | avg 4.3 ms, p95 5.3 ms, max 5.7 ms | ✅ Pass |
+| TC-PERF-01 | VPS-NF-001 | PERF | Slot recommendation response time | 20 requests | every response under 3 s | avg 3.5 ms, p95 4.8 ms, max 5.4 ms | ✅ Pass |
+| TC-PERF-02 | VPS-NF-001 | PERF | Reservation response time | 20 requests | every response under 3 s | avg 5.3 ms, p95 6.3 ms, max 7.4 ms | ✅ Pass |
+| TC-PERF-03 | VPS-NF-002 | PERF | Vehicle search response time | 20 requests | every response under 2 s | avg 4.3 ms, p95 5.0 ms, max 5.7 ms | ✅ Pass |
+| TC-PERF-04 | VPS-NF-003 | PERF | Analytics report response time | 20 requests | every response under 5 s | avg 3.1 ms, p95 3.8 ms, max 4.1 ms | ✅ Pass |
 
 
 ## 5. Defects found by black-box testing
@@ -207,7 +207,7 @@ These were measured on a single developer laptop with a small dataset, so they s
 | Item | Value |
 |---|---|
 | Date of run | 2026-11-18 |
-| Code version | `d51b8d5` on branch `docs/test-reports` |
+| Code version | `cdcd871` on branch `docs/sprint3-final` |
 | Runtime | Node.js v24.19.0 on Darwin 25.4.0 (arm64) |
 | Database | MongoDB 9.0.2 (a fresh test database for each run) |
 | Unit test runner | Node.js built-in test runner (`node:test`), database models stubbed |
