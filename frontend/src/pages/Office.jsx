@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { Suspense, lazy, useState } from "react";
 import { get, post } from "../api.js";
-import { Empty, LoadError, StatusTag, VEHICLE_TYPES, rupees, useAction, useLoad, zoneName, zoneOf } from "../ui.jsx";
+import { Stars } from "../components/Rating.jsx";
+import { Empty, LoadError, StatusTag, VEHICLE_TYPES, formatDay, rupees, useAction, useLoad, zoneName, zoneOf } from "../ui.jsx";
 
 /* ---------- Overview (FR-6) ---------- */
 
@@ -129,8 +130,49 @@ function AddSlot({ onAdded }) {
   );
 }
 
+// FR-9: each slot's reviews and average rating, keyed by slot id.
+async function loadSlotsWithRatings() {
+  const slots = (await get("/slots")).slots;
+  const reviews = await Promise.all(
+    slots.map((s) => get(`/reviews/slot/${s._id}`).catch(() => ({ data: [], rating: null })))
+  );
+  const ratings = Object.fromEntries(slots.map((s, i) => [s._id, reviews[i]]));
+  return { slots, ratings };
+}
+
+function StudentReviews({ slots, ratings }) {
+  const latest = slots
+    .flatMap((s) => (ratings[s._id]?.data || []).map((r) => ({ ...r, slotNumber: s.slotNumber })))
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .slice(0, 6);
+
+  return (
+    <section className="panel">
+      <div className="panel-head"><h2>What students say</h2><span className="hint">Latest ratings</span></div>
+      {latest.length === 0 ? (
+        <p className="muted small">No ratings yet. Students can rate a spot after their visit, from My bookings.</p>
+      ) : (
+        <div className="review-list">
+          {latest.map((r) => (
+            <div key={r._id} className="review-item">
+              <div className="actions">
+                <span className="mono">{r.slotNumber}</span>
+                <Stars value={r.rating} />
+                <span className="muted small">{formatDay(r.createdAt)}</span>
+              </div>
+              {r.review && <p className="small">{r.review}</p>}
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
 export function Slots() {
-  const { data, error, reload } = useLoad(() => get("/slots").then((d) => d.slots), []);
+  const { data: loaded, error, reload } = useLoad(loadSlotsWithRatings, []);
+  const data = loaded?.slots;
+  const ratings = loaded?.ratings || {};
   const { busy, run } = useAction();
 
   const zones = new Map();
@@ -158,6 +200,7 @@ export function Slots() {
             Check for overstays now
           </button>
         </section>
+        {data && <StudentReviews slots={data} ratings={ratings} />}
       </div>
 
       <section className="panel">
@@ -178,6 +221,12 @@ export function Slots() {
                   title={`${s.slotNumber}: ${s.length} × ${s.width} × ${s.height} m`}>
                   <span className="mono">{s.slotNumber}</span>
                   <StatusTag status={s.status} />
+                  {ratings[s._id]?.rating?.totalReviews > 0 && (
+                    <span className="slot-rating">
+                      <Stars value={ratings[s._id].rating.averageRating} /> {ratings[s._id].rating.averageRating.toFixed(1)}
+                      {" "}({ratings[s._id].rating.totalReviews})
+                    </span>
+                  )}
                 </div>
               ))}
             </div>
@@ -188,18 +237,28 @@ export function Slots() {
   );
 }
 
+// The QR scanner (jsQR) is only needed at the gate, so it loads on first use.
+const GateCheck = lazy(() => import("./GateCheck.jsx"));
+
+const PAGES = {
+  overview: ["Parking office", "How full campus parking is, when people arrive and what came in.", Overview],
+  slots: ["Slots", "Add slots, see which ones are taken and how students rate them, and run the overstay check.", Slots],
+  gate: ["Gate check", "Scan a student's QR gate pass to see whose vehicle it is and where it's parked.", GateCheck]
+};
+
 export default function Office({ tab }) {
+  const [title, lead, Page] = PAGES[tab] || PAGES.overview;
   return (
     <main className="page">
       <div className="page-head">
         <div>
-          <h1>{tab === "slots" ? "Slots" : "Parking office"}</h1>
-          <p>{tab === "slots"
-            ? "Add slots, see which ones are taken, and run the overstay check."
-            : "How full campus parking is, when people arrive and what came in."}</p>
+          <h1>{title}</h1>
+          <p>{lead}</p>
         </div>
       </div>
-      {tab === "slots" ? <Slots /> : <Overview />}
+      <Suspense fallback={<p className="muted small">Loading…</p>}>
+        <Page />
+      </Suspense>
     </main>
   );
 }

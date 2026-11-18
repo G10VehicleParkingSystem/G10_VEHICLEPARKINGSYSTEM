@@ -53,7 +53,8 @@ the result as the `test-reports` artifact.
 
 The React app in `frontend/` is the student and parking-office UI: book a spot,
 check in and out, pay, monthly pass, find your vehicle, fines, alerts, and the
-office report and slot map. Students and faculty create an account with their
+office report, slot map with student ratings (FR-9), and a gate check that scans a
+student's QR gate pass by camera, photo or code. Students and faculty create an account with their
 college email and sign in; the parking office signs in with the admin account
 (see Login below) and only sees the office screens.
 
