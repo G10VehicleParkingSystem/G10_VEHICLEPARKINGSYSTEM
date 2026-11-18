@@ -38,8 +38,16 @@ Health check: `GET /api/health`
 Run the unit tests (no database needed):
 
 ```bash
-npm test
+npm test                 # unit tests (white-box)
+npm run test:coverage    # unit tests with code and branch coverage
+npm run reports          # full test reports in docs/reports (needs MongoDB)
 ```
+
+`npm run reports` runs the unit tests and the black-box system suite
+(`tests/blackbox/run-blackbox.mjs`) against a real server, measures coverage of
+both, and writes the coverage, white-box, black-box, traceability and test summary
+reports to [docs/reports](docs/reports/README.md). CI runs it on every push and keeps
+the result as the `test-reports` artifact.
 
 ## Web front end (CampusPark)
 

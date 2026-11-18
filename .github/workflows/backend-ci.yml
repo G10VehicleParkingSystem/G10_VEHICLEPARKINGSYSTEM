@@ -128,3 +128,57 @@ jobs:
           if [ -f server.log ]; then
             cat server.log
           fi
+
+  # Test reports: white-box unit tests with code and branch coverage, the black-box
+  # system suite against a real server and MongoDB, and the Markdown reports
+  # (scripts/generate-test-reports.mjs). The generated docs/reports folder is kept
+  # as a downloadable artifact.
+  test-reports:
+    name: Coverage and Test Reports
+    needs: backend-ci
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      mongo:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.runCommand({ ping: 1 })'"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Generate Test Reports
+        run: npm run reports
+        env:
+          REPORT_MONGO_URI: mongodb://127.0.0.1:27017/g10_ci_reports
+
+      - name: Coverage Summary
+        if: always()
+        run: |
+          if [ -f docs/reports/README.md ]; then
+            sed -n '/| Headline/,/^$/p' docs/reports/README.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload Test Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: docs/reports
+          retention-days: 30
