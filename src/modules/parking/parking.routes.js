@@ -7,6 +7,8 @@ const {
   getVehicleTracking
 } = require("./parking.controller");
 
+const { ownVehicleOnly } = require("../vehicle/vehicle.controller");
+
 const router = express.Router();
 
 router.post("/check-in", checkIn);
@@ -18,6 +20,7 @@ router.post(
 
 router.get(
   "/tracking/:vehicleNumber",
+  ownVehicleOnly,
   getVehicleTracking
 );
 

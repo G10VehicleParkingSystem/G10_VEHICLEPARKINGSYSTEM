@@ -1,4 +1,5 @@
 const express = require("express");
+const { ownUserParam } = require("../auth/auth.middleware");
 
 const {
   createReservation,
@@ -7,6 +8,8 @@ const {
 } = require("./reservation.controller");
 
 const router = express.Router();
+
+router.param("userId", ownUserParam);
 
 router.post("/", createReservation);
 router.get("/my/:userId", getMyReservations);

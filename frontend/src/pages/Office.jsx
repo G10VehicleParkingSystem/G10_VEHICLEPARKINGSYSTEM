@@ -2,12 +2,6 @@ import { useState } from "react";
 import { get, post } from "../api.js";
 import { Empty, LoadError, StatusTag, VEHICLE_TYPES, rupees, useAction, useLoad, zoneName, zoneOf } from "../ui.jsx";
 
-const NoLoginNote = () => (
-  <div className="notice warn" style={{ marginBottom: 22 }}>
-    Anyone can open the parking office right now. Office-only login comes with the security work (D-1).
-  </div>
-);
-
 /* ---------- Overview (FR-6) ---------- */
 
 function Bars({ items, label, value, format = (v) => v }) {
@@ -205,7 +199,6 @@ export default function Office({ tab }) {
             : "How full campus parking is, when people arrive and what came in."}</p>
         </div>
       </div>
-      <NoLoginNote />
       {tab === "slots" ? <Slots /> : <Overview />}
     </main>
   );

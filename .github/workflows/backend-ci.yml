@@ -14,6 +14,13 @@ on:
 permissions:
   contents: read
 
+env:
+  # Throwaway parking office login and token secret for the CI test databases. The
+  # server creates this admin on start-up and the smoke test signs in with it.
+  ADMIN_EMAIL: office@campuspark.test
+  ADMIN_PASSWORD: ci-office-password
+  JWT_SECRET: ci-only-jwt-secret
+
 jobs:
   backend-ci:
     name: Backend Testing and Coverage

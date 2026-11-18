@@ -1,4 +1,5 @@
 const express = require("express");
+const { requireAdmin, ownUserParam } = require("../auth/auth.middleware");
 
 const {
   createNotification,
@@ -8,7 +9,9 @@ const {
 
 const router = express.Router();
 
-router.post("/", createNotification);
+router.param("userId", ownUserParam);
+
+router.post("/", requireAdmin, createNotification);
 router.get("/:userId", getNotifications);
 router.patch("/:id/read", markNotificationAsRead);
 
