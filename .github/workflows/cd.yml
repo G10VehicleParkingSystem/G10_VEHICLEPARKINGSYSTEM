@@ -1,0 +1,192 @@
+# Continuous delivery: ships main. Starts only after the CI workflow (ci.yml) has
+# passed for a push to main, and works on exactly the commit CI tested:
+#   1. build the production Docker image and publish it to GitHub Container Registry
+#   2. deploy it: pull the published image, verify it, and update the live host
+# It can also be started by hand (Actions > CD > Run workflow) to redeploy main.
+name: CD
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  # One release at a time, and never cancel one half way through.
+  group: cd-production
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: 22
+  # The commit to release: the one CI tested, or main's head for a manual run.
+  RELEASE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+  # Throwaway parking office login and token secret for the release check database.
+  ADMIN_EMAIL: office@campuspark.test
+  ADMIN_PASSWORD: ci-office-password
+  JWT_SECRET: ci-only-jwt-secret
+
+jobs:
+  publish:
+    name: Publish Docker Image
+    # Only after a successful CI run for a push to main (not a pull request), or a
+    # manual run on main.
+    if: >-
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push') ||
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image: ${{ steps.image.outputs.name }}
+      tag: ${{ steps.image.outputs.tag }}
+
+    steps:
+      - name: Checkout the Tested Commit
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ env.RELEASE_SHA }}
+
+      - name: Image Name
+        id: image
+        shell: bash
+        run: |
+          echo "name=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+          echo "tag=sha-${RELEASE_SHA::7}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Publish Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ steps.image.outputs.name }}:${{ steps.image.outputs.tag }}
+            ${{ steps.image.outputs.name }}:latest
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ env.RELEASE_SHA }}
+            org.opencontainers.image.title=G10 Vehicle Parking System
+          cache-from: type=gha
+
+  # Deploy the published image. It pulls the exact image that was published, starts it
+  # and verifies it as a release check. If a hosting deploy hook is configured
+  # (repository secret DEPLOY_HOOK_URL, e.g. a Render deploy hook), it also triggers the
+  # live deployment and smoke tests the live URL (repository variable PRODUCTION_URL).
+  deploy:
+    name: Deploy to Production
+    needs: publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: read
+    environment:
+      name: production
+      url: ${{ steps.done.outputs.url }}
+
+    services:
+      mongo:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.runCommand({ ping: 1 })'"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+
+    steps:
+      - name: Checkout the Tested Commit
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ env.RELEASE_SHA }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull and Start the Published Image
+        env:
+          IMAGE: ${{ needs.publish.outputs.image }}:${{ needs.publish.outputs.tag }}
+        run: |
+          docker pull "$IMAGE"
+          docker run -d --name g10-parking --network host \
+            -e PORT=5000 \
+            -e MONGO_URI=mongodb://127.0.0.1:27017/g10_release_check \
+            -e PAYMENT_GATEWAY=demo \
+            -e ADMIN_EMAIL -e ADMIN_PASSWORD -e JWT_SECRET \
+            "$IMAGE"
+
+      - name: Verify the Release
+        run: node scripts/smoke-test.mjs
+        env:
+          BASE_URL: http://localhost:5000/api
+
+      - name: Trigger Live Deployment
+        env:
+          DEPLOY_HOOK_URL: ${{ secrets.DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$DEPLOY_HOOK_URL" ]; then
+            echo "No DEPLOY_HOOK_URL secret set: the verified image is published, no live host to update."
+            exit 0
+          fi
+          curl -fsS -X POST "$DEPLOY_HOOK_URL" > /dev/null
+          echo "Live deployment triggered."
+
+      - name: Smoke Test the Live Site
+        if: vars.PRODUCTION_URL != ''
+        run: node scripts/smoke-test.mjs
+        env:
+          BASE_URL: ${{ vars.PRODUCTION_URL }}/api
+          SMOKE_WAIT_SECONDS: 300
+          # The live site's own parking office login (repository secrets).
+          ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+
+      - name: Show Container Log
+        if: always()
+        run: docker logs g10-parking
+
+      - name: Deployment Summary
+        id: done
+        env:
+          IMAGE: ${{ needs.publish.outputs.image }}
+          TAG: ${{ needs.publish.outputs.tag }}
+          PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
+        run: |
+          package_url="${{ github.server_url }}/${{ github.repository }}/pkgs/container/${IMAGE##*/}"
+          echo "url=${PRODUCTION_URL:-$package_url}" >> "$GITHUB_OUTPUT"
+          {
+            echo "### Deployed ${TAG}"
+            echo ""
+            echo "- Commit: \`${RELEASE_SHA}\`"
+            echo "- Image: \`${IMAGE}:${TAG}\` (also tagged \`latest\`)"
+            echo "- Run it: \`docker run -p 5000:5000 -e MONGO_URI=<your MongoDB> ${IMAGE}:latest\`"
+            if [ -n "$PRODUCTION_URL" ]; then echo "- Live site: ${PRODUCTION_URL}"; fi
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -95,25 +95,40 @@ Or pull the published image:
 
 ## CI/CD pipeline
 
-`.github/workflows/backend-ci.yml` runs these stages, each starting only if the ones
-before it passed:
+The pipeline is two GitHub Actions workflows. CD only ever ships a commit that CI
+has already passed.
 
-| Stage | Runs on | What it does |
-|---|---|---|
-| Backend Validation | every push to `main` and `feature/**`, every PR | `npm ci`, lint, syntax check, unit tests |
-| Front End Build | same, alongside validation | builds the React app in `frontend/` and keeps it as a downloadable artifact |
-| End-to-End Test (MongoDB) | same | starts the server against a real MongoDB and runs `scripts/smoke-test.mjs` |
-| Build, Test and Publish Docker Image | same | builds the image (API and web app) and smoke tests the container; on `main` publishes it to GitHub Container Registry as `sha-<commit>` and `latest` |
-| Deploy to Production | `main` only | pulls the published image, verifies the release, triggers the live host and smoke tests it |
+**CI, continuous integration** (`.github/workflows/ci.yml`): checks every push to
+`main` and `feature/**` and every pull request. It never publishes anything.
+
+| Job | What it does |
+|---|---|
+| Backend Testing and Coverage | `npm ci`, lint, unit tests with c8 coverage (kept as the `g10-coverage-report` artifact), then starts the server against MongoDB and runs `scripts/smoke-test.mjs` |
+| Front End Build | builds the React app in `frontend/` and keeps it as the `campuspark-web` artifact |
+| Coverage and Test Reports | `npm run reports`: unit tests with coverage plus the black-box suite against a real server; keeps `docs/reports` as the `test-reports` artifact |
+| Build and Test Docker Image | builds the production image (API and web app), starts it and smoke tests the container |
+
+**CD, continuous delivery** (`.github/workflows/cd.yml`): starts automatically when
+CI succeeds for a push to `main`, and releases exactly the commit CI tested. It can
+also be run by hand from the Actions tab to redeploy `main`.
+
+| Job | What it does |
+|---|---|
+| Publish Docker Image | builds the image and publishes it to GitHub Container Registry as `sha-<commit>` and `latest` |
+| Deploy to Production | pulls the published image, verifies the release, triggers the live host and smoke tests it |
+
+The live site runs on Render (free plan) with MongoDB Atlas: https://g10-parking.onrender.com.
+The first request after 15 minutes without visitors takes about a minute while the
+free instance wakes up.
 
 To deploy to a live host (for example Render, with MongoDB Atlas), add a repository
 secret `DEPLOY_HOOK_URL` (the host's deploy hook) and a repository variable
 `PRODUCTION_URL` (the site's address). Set `JWT_SECRET`, `ADMIN_EMAIL` and
 `ADMIN_PASSWORD` on the host, and add the same admin login as repository secrets
 `ADMIN_EMAIL` and `ADMIN_PASSWORD` so the pipeline can smoke test the live site.
-Without them the pipeline still publishes and verifies every release, and the
-live-host steps are skipped. The CI stages use a throwaway admin login and token
-secret set in the workflow, only for their test databases.
+Without them CD still publishes and verifies every release, and the live-host
+steps are skipped. Both workflows use a throwaway admin login and token secret,
+set in the workflow files, only for their test databases.
 
 ## Configuration
 
