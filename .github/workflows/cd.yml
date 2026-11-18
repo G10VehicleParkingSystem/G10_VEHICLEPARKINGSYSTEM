@@ -161,12 +161,38 @@ jobs:
           curl -fsS -X POST "$DEPLOY_HOOK_URL" > /dev/null
           echo "Live deployment triggered."
 
+      # Render keeps serving the previous version while it builds the new one, so wait
+      # until the live site reports the commit being released before testing it.
+      - name: Wait for the New Version to Go Live
+        if: vars.PRODUCTION_URL != ''
+        env:
+          PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
+        run: |
+          for attempt in $(seq 1 60); do
+            live=$(curl -fsS -m 60 "$PRODUCTION_URL/api/health" 2>/dev/null \
+              | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{console.log(JSON.parse(s).version||"")}catch{console.log("")}})')
+            echo "Attempt $attempt: live version '${live:-unreachable}', waiting for ${RELEASE_SHA::7}"
+            if [ "$live" = "$RELEASE_SHA" ]; then
+              echo "Release ${RELEASE_SHA::7} is live."
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "The live site did not switch to ${RELEASE_SHA::7} within 15 minutes. Check the Render deploy log."
+          exit 1
+
+      # Read-only: signs in as the office and checks roles and reports, but creates no
+      # slots, accounts or bookings in the live database.
       - name: Smoke Test the Live Site
         if: vars.PRODUCTION_URL != ''
-        run: node scripts/smoke-test.mjs
+        run: |
+          node scripts/smoke-test.mjs
+          curl -fsS "${{ vars.PRODUCTION_URL }}/" | grep -q "<title>CampusPark</title>"
+          echo "The live site serves the CampusPark web app."
         env:
           BASE_URL: ${{ vars.PRODUCTION_URL }}/api
-          SMOKE_WAIT_SECONDS: 300
+          SMOKE_WAIT_SECONDS: 120
+          SMOKE_READ_ONLY: "1"
           # The live site's own parking office login (repository secrets).
           ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}

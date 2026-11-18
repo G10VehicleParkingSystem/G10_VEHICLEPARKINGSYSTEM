@@ -3,11 +3,14 @@
 // and exits non-zero on the first unexpected answer. Accounts, slot and vehicle numbers
 // are unique per run, so it is safe to point at a database that already holds data.
 // The server must have been started with the same ADMIN_EMAIL / ADMIN_PASSWORD.
+// SMOKE_READ_ONLY=1 only reads (sign-in, role checks, slots, analytics) and creates
+// nothing, for checking the live site without adding test data to its database.
 //   BASE_URL=http://localhost:5000/api ADMIN_EMAIL=... ADMIN_PASSWORD=... node scripts/smoke-test.mjs
 const BASE = (process.env.BASE_URL || "http://localhost:5000/api").replace(/\/$/, "");
 const WAIT_SECONDS = Number(process.env.SMOKE_WAIT_SECONDS || 60);
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+const READ_ONLY = process.env.SMOKE_READ_ONLY === "1";
 
 if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
   console.error("✗ set ADMIN_EMAIL and ADMIN_PASSWORD (the parking office account the server creates)");
@@ -64,6 +67,23 @@ await expect("health check", "GET", "/health", null, 200);
 await expect("API refuses requests without a sign-in", "GET", "/slots", null, 401);
 const office = (await expect("parking office signs in", "POST", "/auth/login",
   { email: ADMIN_EMAIL, password: ADMIN_PASSWORD }, 200)).token;
+await expect("wrong password is refused", "POST", "/auth/login",
+  { email: ADMIN_EMAIL, password: `not-${ADMIN_PASSWORD}` }, 401);
+
+if (READ_ONLY) {
+  const me = await expect("office reads its own account", "GET", "/auth/me", null, 200, office);
+  if (me.user?.role !== "admin") {
+    console.error(`✗ expected the office account to be an admin, got ${me.user?.role}`);
+    process.exit(1);
+  }
+  await expect("forged token is refused", "GET", "/slots", null, 401, "forged.token.value");
+  await expect("FR-1 office lists the slots", "GET", "/slots", null, 200, office);
+  await expect("FR-8 monthly plan is available", "GET", "/subscriptions/plans", null, 200, office);
+  await expect("FR-6 office opens the analytics report", "GET", "/analytics", null, 200, office);
+  console.log(`All ${step} read-only smoke checks passed.`);
+  process.exit(0);
+}
+
 const password = `smoke-${run}-pass`;
 const signup = await expect("student signs up", "POST", "/auth/register",
   { name: `Smoke ${run}`, email: `smoke-${run.toLowerCase()}@campus.test`, password, detail: "CI" }, 201);

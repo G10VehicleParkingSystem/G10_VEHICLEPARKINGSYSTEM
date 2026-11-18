@@ -115,7 +115,7 @@ also be run by hand from the Actions tab to redeploy `main`.
 | Job | What it does |
 |---|---|
 | Publish Docker Image | builds the image and publishes it to GitHub Container Registry as `sha-<commit>` and `latest` |
-| Deploy to Production | pulls the published image, verifies the release, triggers the live host and smoke tests it |
+| Deploy to Production | pulls the published image and runs the full smoke test on it, triggers Render, waits until `/api/health` on the live site reports the released commit, then runs a read-only smoke test there (`SMOKE_READ_ONLY=1`: sign-in, roles and reports, no test data written to the live database) |
 
 The live site runs on Render (free plan) with MongoDB Atlas: https://g10-parking.onrender.com.
 The first request after 15 minutes without visitors takes about a minute while the
