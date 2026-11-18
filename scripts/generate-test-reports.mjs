@@ -212,7 +212,7 @@ const MODULE_REQ = {
   notification: "FR-7 · VPS-F-014", subscription: "FR-8", review: "FR-9", auth: "Security · VPS-F-001, NF-004"
 };
 
-// Defects found during Sprint 2 testing (kept here so the reports and the log agree).
+// Defects found during Sprint 2 and Sprint 3 (Testing) (kept here so the reports and the log agree).
 const DEFECTS = [
   {
     id: "DEF-01", severity: "High", requirement: "FR-7 · VPS-F-014",
@@ -581,7 +581,7 @@ The Software Test Plan v1.0 (16-Sep-2026) was written before development. This p
 | Vehicles belong to an account | PR #50 | TC-VEH-08 (my vehicles), TC-TRK-05 / 06 (only the owner or the office can track) |
 | DEF-02 double booking fixed | this PR | TC-RES-14 added as a permanent regression test (20 parallel bookings, 3 rounds) |
 
-## New kinds of testing added in Sprint 2
+## New kinds of testing added in Sprint 3 (Testing, 16-20 Nov)
 
 - **Boundary value cases** for password length (TC-AUTH-03..05), vehicle size (TC-VEH-03, 06), booking edges (TC-RES-04..06), billing hours (TC-PAY-03) and ratings (TC-REV-02).
 - **Security input cases** for Test Plan 5.1: forged tokens (TC-SEC-02), NoSQL injection in the login (TC-SEC-09), malformed JSON (TC-SEC-10), and how passwords and payments are stored (TC-SEC-11, 12).
@@ -613,7 +613,7 @@ write("TEST_SUMMARY_REPORT.md", `
 
 ## 1. Summary
 
-${allPassed ? "All planned tests were executed and passed." : "Some tests failed; see the details below."} The back end was tested at three levels: **${unit.total} white-box unit tests**, **${bb.total} black-box system tests** against a real server and MongoDB, and the CI/CD smoke test, which runs on every push. Two defects were found during Sprint 2 testing; both are fixed and retested.
+${allPassed ? "All planned tests were executed and passed." : "Some tests failed; see the details below."} The back end was tested at three levels: **${unit.total} white-box unit tests**, **${bb.total} black-box system tests** against a real server and MongoDB, and the CI/CD smoke test, which runs on every push. Two defects were found, one in Sprint 2 integration and one in Sprint 3 (Testing); both are fixed and retested.
 
 | Level | Cases | Passed | Failed | Not run |
 |---|---|---|---|---|
@@ -632,7 +632,7 @@ Reports: [coverage](COVERAGE_REPORT.md) · [white-box](WHITE_BOX_TEST_REPORT.md)
 
 | Test Plan | What happened | Reason |
 |---|---|---|
-| Schedule 18-28 Sep 2026 (section 7) | Testing ran in Sprint 1 and Sprint 2 and was completed in November | The Deliverables brief set the sprint calendar later (deviation D-7) |
+| Schedule 18-28 Sep 2026 (section 7) | Testing ran in Sprint 1 (19-23 Oct), Sprint 2 (26-30 Oct, continued into November) and a dedicated testing sprint, Sprint 3 (16-20 Nov) | The Deliverables brief set the sprint calendar later (deviation D-7) |
 | Tools: Postman, browser tools (section 6) | Automated runners replaced manual Postman runs: \`node:test\`, c8 for coverage and a scripted HTTP suite | Repeatable, and run by CI on every push |
 | Integration tests front end ↔ back end ↔ DB ↔ payment (section 5) | The back end, database and payment interface are tested automatically. The React front end was tested by hand on every screen at desktop width and at 390 px phone width | No automated browser tests yet |
 | Payment sandbox (section 11) | Demo gateway (\`PAYMENT_GATEWAY=demo\`) | No provider account (deviation D-3) |
@@ -678,7 +678,8 @@ The system meets its tested requirements. The two defects were both concurrency 
 ## 7. Activities
 
 - Sprint 1: unit tests for FR-1 to FR-7 written by each module owner; CI on every push.
-- Sprint 2: unit tests for FR-8 and FR-9; CI/CD with an end-to-end smoke test, Docker image test and release check; login and roles tested (security); white-box tests written for branch coverage; black-box suite traced to the Test Plan; reports generated.
+- Sprint 2 (26-30 Oct, continued into November): unit tests for FR-8 and FR-9; CI/CD with an end-to-end smoke test, Docker image test and release check; login and roles tested (security); DEF-01 found in an integration run.
+- Sprint 3, Testing (16-20 Nov): white-box tests written for branch coverage; black-box suite traced to the Test Plan, which found DEF-02; coverage measured; these reports generated; read-only smoke test of the live site after every release.
 - Regression: \`npm test\` and the smoke test run on every push and pull request (\`.github/workflows/ci.yml\`; releases from main go through \`cd.yml\`).
 
 ## 8. Environment
