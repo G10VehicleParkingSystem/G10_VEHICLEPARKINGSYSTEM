@@ -82,8 +82,6 @@ Both are retested and closed. No critical or high defects are open.
 
 ## Open items
 
-- Re-record the Sprint 2 / final demo video: `SE_sprint2.mp4` was recorded on
-  31 Oct, before the web app and login existed (#32).
 - Database schema review (#19) and UI/UX and SRS compliance review (#20).
 
 Deviations from the submitted SRS, SAD and Test Plan, and how each one ended, are
