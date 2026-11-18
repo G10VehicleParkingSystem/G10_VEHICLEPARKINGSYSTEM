@@ -154,6 +154,55 @@ test("WB-RES-01 createReservation input checks: bad ids, bad times, end before s
   );
 });
 
+function bookingWorld(t, lockResults, { overlap = null } = {}) {
+  const lockCalls = [];
+  stubModel(t, Vehicle, { findById: async () => ({ length: 4, width: 1.8, height: 1.5 }) });
+  stubModel(t, ParkingSlot, {
+    findById: async () => ({ length: 5, width: 2.5, height: 2.2 }),
+    updateOne: async (filter, update) => {
+      lockCalls.push({ filter, update });
+      return { modifiedCount: "bookingLock" in filter && filter.bookingLock !== null ? 1 : lockResults.shift() ?? 1 };
+    }
+  });
+  stubModel(t, Reservation, { findOne: async () => overlap, create: async (r) => ({ _id: id(), ...r }) });
+  stubModel(t, require("../src/modules/subscription/subscription.model"), { findOne: async () => null });
+  stubModel(t, Notification, { create: async () => ({}) });
+  return lockCalls;
+}
+
+const bookingInput = () => ({
+  userId: String(id()), vehicleId: String(id()), slotId: String(id()),
+  startTime: minutesFromNow(60), endTime: minutesFromNow(120)
+});
+
+test("WB-RES-04 booking lock: waits while the slot is busy, then books and releases the lock", async (t) => {
+  const calls = bookingWorld(t, [0, 0, 1]);
+  const booking = await reservationService.createReservation(bookingInput());
+  assert.equal(booking.status, "CONFIRMED");
+  const takes = calls.filter((c) => c.filter.$or);
+  const release = calls.at(-1);
+  assert.equal(takes.length, 3);
+  assert.equal(String(release.filter.bookingLock), String(takes[0].update.$set.bookingLock));
+  assert.equal(release.update.$set.bookingLock, null);
+});
+
+test("WB-RES-05 booking lock is released even when the slot turns out to be taken", async (t) => {
+  const calls = bookingWorld(t, [1], { overlap: { _id: "other" } });
+  await assert.rejects(reservationService.createReservation(bookingInput()), /already reserved/);
+  assert.equal(calls.at(-1).update.$set.bookingLock, null);
+});
+
+test("WB-RES-06 booking lock gives up with a clear message when the slot stays busy", async (t) => {
+  const original = process.env.BOOKING_LOCK_WAIT_MS;
+  process.env.BOOKING_LOCK_WAIT_MS = "60";
+  t.after(() => {
+    if (original === undefined) delete process.env.BOOKING_LOCK_WAIT_MS;
+    else process.env.BOOKING_LOCK_WAIT_MS = original;
+  });
+  bookingWorld(t, Array(1000).fill(0));
+  await assert.rejects(reservationService.createReservation(bookingInput()), /being booked by someone else/);
+});
+
 test("WB-RES-02 cancel: not found, already cancelled, already started, and success", async (t) => {
   stubModel(t, Reservation, { findOne: async () => null });
   await assert.rejects(reservationService.cancelReservation(id(), id()), /not found/);

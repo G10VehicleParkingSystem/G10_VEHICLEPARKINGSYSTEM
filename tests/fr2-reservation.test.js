@@ -28,7 +28,8 @@ function reservationInput(overrides = {}) {
 
 function stubVehicleAndSlot(t, { vehicle, slot }) {
   stubModel(t, Vehicle, { findById: async () => vehicle });
-  stubModel(t, ParkingSlot, { findById: async () => slot });
+  // updateOne is the slot's booking lock (take and release).
+  stubModel(t, ParkingSlot, { findById: async () => slot, updateOne: async () => ({ modifiedCount: 1 }) });
 }
 
 const car = { length: 4.5, width: 1.8, height: 1.5 };
