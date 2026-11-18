@@ -732,5 +732,16 @@ npm run reports
 The raw data is in [data/](data/): JUnit XML for the unit tests, JSON for the black-box results and the coverage totals, and the server log from the system run.
 `);
 
+// Published files must not carry the local checkout path (it contains the user's
+// home folder): rewrite it to "." in every text file the run produced.
+for (const dir of [DATA, COV]) {
+  for (const entry of fs.readdirSync(dir, { recursive: true })) {
+    const file = path.join(dir, entry);
+    if (!/\.(json|log|xml|html)$/.test(file) || !fs.statSync(file).isFile()) continue;
+    const text = fs.readFileSync(file, "utf8");
+    if (text.includes(ROOT)) fs.writeFileSync(file, text.split(ROOT).join("."));
+  }
+}
+
 console.log(`\nDone. Unit ${unit.passed}/${unit.total}, black-box ${bb.passed}/${bb.total}, coverage ${pct(coverage.combined.total.statements.pct)} statements / ${pct(coverage.combined.total.branches.pct)} branches.`);
 process.exit(allPassed && unitExit === 0 ? 0 : 1);
