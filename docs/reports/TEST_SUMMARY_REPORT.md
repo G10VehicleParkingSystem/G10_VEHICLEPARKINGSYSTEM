@@ -88,7 +88,7 @@ The system meets its tested requirements. The two defects were both concurrency 
 
 - Sprint 1: unit tests for FR-1 to FR-7 written by each module owner; CI on every push.
 - Sprint 2: unit tests for FR-8 and FR-9; CI/CD with an end-to-end smoke test, Docker image test and release check; login and roles tested (security); white-box tests written for branch coverage; black-box suite traced to the Test Plan; reports generated.
-- Regression: `npm test` and the smoke test run on every push and pull request (`.github/workflows/backend-ci.yml`).
+- Regression: `npm test` and the smoke test run on every push and pull request (`.github/workflows/ci.yml`; releases from main go through `cd.yml`).
 
 ## 8. Environment
 
