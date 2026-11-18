@@ -54,7 +54,8 @@ and 14).
 Results (from [`reports/TEST_SUMMARY_REPORT.md`](reports/TEST_SUMMARY_REPORT.md)):
 
 - 164 unit tests and 87 black-box tests, all passing.
-- Coverage of the back end: 98.5% of statements, 96.1% of branches.
+- Coverage of the back end: about 98% of statements and 96% of branches (exact
+  figures in [`reports/COVERAGE_REPORT.md`](reports/COVERAGE_REPORT.md)).
 - Every requirement in the Test Plan (VPS-F-001..014, VPS-NF-001..005) has
   passing tests; see the [traceability matrix](reports/TRACEABILITY_MATRIX.md).
 - Response times measured on the local server were in the milliseconds, far
