@@ -52,6 +52,7 @@ export default function App() {
         <Route path="alerts" element={student(<Alerts />)} />
         <Route path="office" element={office(<Office tab="overview" />)} />
         <Route path="office/slots" element={office(<Office tab="slots" />)} />
+        <Route path="office/gate" element={office(<Office tab="gate" />)} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
