@@ -6,6 +6,50 @@ const ParkingSlot = require("../slot/slot.model");
 const notificationService = require("../notification/notification.service");
 const { vehicleFitsSlot } = require("../slot/slot.service");
 
+const LOCK_HOLD_MS = 5000;
+
+// Runs work() while holding the slot's booking lock. The lock is taken with a single
+// atomic update, so only one request per slot can check for overlaps and save at a
+// time. It expires after LOCK_HOLD_MS in case a server dies while holding it; a
+// request gives up after BOOKING_LOCK_WAIT_MS (default 3 s) of waiting.
+async function withSlotLock(slotId, work) {
+  const token = new mongoose.Types.ObjectId();
+  const giveUpAt = Date.now() + Number(process.env.BOOKING_LOCK_WAIT_MS || 3000);
+
+  for (;;) {
+    const now = new Date();
+    const result = await ParkingSlot.updateOne(
+      {
+        _id: slotId,
+        $or: [{ bookingLock: null }, { bookingLockExpires: { $lte: now } }]
+      },
+      {
+        $set: {
+          bookingLock: token,
+          bookingLockExpires: new Date(now.getTime() + LOCK_HOLD_MS)
+        }
+      }
+    );
+
+    if (result.modifiedCount === 1) break;
+
+    if (Date.now() >= giveUpAt) {
+      throw new Error("This parking slot is being booked by someone else, please try again");
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 10 + Math.random() * 30));
+  }
+
+  try {
+    return await work();
+  } finally {
+    await ParkingSlot.updateOne(
+      { _id: slotId, bookingLock: token },
+      { $set: { bookingLock: null, bookingLockExpires: null } }
+    );
+  }
+}
+
 async function checkSlotAvailability(slotId, startTime, endTime) {
   const now = new Date();
 
@@ -80,21 +124,23 @@ async function createReservation({
     throw new Error("Vehicle does not fit the selected parking slot");
   }
 
-  const available = await checkSlotAvailability(slotId, start, end);
+  const reservation = await withSlotLock(slotId, async () => {
+    const available = await checkSlotAvailability(slotId, start, end);
 
-  if (!available) {
-    throw new Error(
-      "This parking slot is already reserved for the selected time"
-    );
-  }
+    if (!available) {
+      throw new Error(
+        "This parking slot is already reserved for the selected time"
+      );
+    }
 
-  const reservation = await Reservation.create({
-    userId,
-    vehicleId,
-    slotId,
-    startTime: start,
-    endTime: end,
-    status: "CONFIRMED"
+    return Reservation.create({
+      userId,
+      vehicleId,
+      slotId,
+      startTime: start,
+      endTime: end,
+      status: "CONFIRMED"
+    });
   });
 
   await notificationService.notifyReservationConfirmed(

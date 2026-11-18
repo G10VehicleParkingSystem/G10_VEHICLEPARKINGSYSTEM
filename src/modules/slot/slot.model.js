@@ -32,6 +32,20 @@ const parkingSlotSchema = new mongoose.Schema(
       type: String,
       enum: ["AVAILABLE", "OCCUPIED"],
       default: "AVAILABLE"
+    },
+
+    // Short-lived lock held while a booking for this slot is checked and saved, so
+    // two requests at the same moment cannot both pass the overlap check.
+    bookingLock: {
+      type: mongoose.Schema.Types.ObjectId,
+      default: null,
+      select: false
+    },
+
+    bookingLockExpires: {
+      type: Date,
+      default: null,
+      select: false
     }
   },
   { timestamps: true }

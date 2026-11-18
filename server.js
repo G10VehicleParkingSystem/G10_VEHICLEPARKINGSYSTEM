@@ -154,9 +154,20 @@ async function startServer() {
     void detectOverstays();
     void sendReminders();
     void expireSubscriptionRecords();
-    app.listen(PORT, () => {
+    const server = app.listen(PORT, () => {
       console.log(`Server running at http://localhost:${PORT}`);
     });
+
+    // Shut down cleanly on Ctrl+C or `docker stop` (SIGTERM): stop taking requests and
+    // close the database connection. This also lets coverage tools write their data.
+    const shutdown = (signal) => {
+      console.log(`${signal} received, shutting down`);
+      server.close();
+      mongoose.disconnect().finally(() => process.exit(0));
+      setTimeout(() => process.exit(0), 5000).unref();
+    };
+    process.once("SIGINT", shutdown);
+    process.once("SIGTERM", shutdown);
   } catch (error) {
     console.error("MongoDB connection failed:");
     console.error(error.message);
