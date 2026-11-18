@@ -1,50 +1,12 @@
 
 require("dotenv").config();
 
-const express = require("express");
-const cors = require("cors");
 const mongoose = require("mongoose");
+const app = require("./app");
 
-const reservationRoutes = require("./src/modules/reservation/reservation.routes");
-const notificationRoutes = require("./src/modules/notification/notification.routes");
-const paymentRoutes = require("./src/modules/payment/payment.routes");
-const overstayRoutes = require("./src/modules/overstay/overstay.routes");
 const overstayService = require("./src/modules/overstay/overstay.service");
-const analyticsRoutes = require("./src/modules/analytics/analytics.routes");
-const vehicleRoutes = require("./src/modules/vehicle/vehicle.routes");
-const slotRoutes = require("./src/modules/slot/slot.routes");
-const parkingRoutes = require("./src/modules/parking/parking.routes");
-const subscriptionRoutes = require("./src/modules/subscription/subscription.routes");
+const notificationReminders = require("./src/modules/notification/notification.reminders");
 const subscriptionService = require("./src/modules/subscription/subscription.service");
-
-// FR-9: Review module
-const reviewRoutes = require("./src/modules/review/review.routes");
-
-const app = express();
-
-app.use(cors());
-app.use(express.json());
-
-app.get("/api/health", (req, res) => {
-  res.json({
-    success: true,
-    message: "G10 Vehicle Parking System backend (FR-1 to FR-9) is running"
-  });
-});
-
-// Existing module routes
-app.use("/api/reservations", reservationRoutes);
-app.use("/api/notifications", notificationRoutes);
-app.use("/api/payments", paymentRoutes);
-app.use("/api/overstays", overstayRoutes);
-app.use("/api/analytics", analyticsRoutes);
-app.use("/api/vehicles", vehicleRoutes);
-app.use("/api/slots", slotRoutes);
-app.use("/api/parking", parkingRoutes);
-app.use("/api/subscriptions", subscriptionRoutes);
-
-// FR-9: Review routes
-app.use("/api/reviews", reviewRoutes);
 
 const PORT = process.env.PORT || 5000;
 
@@ -54,8 +16,9 @@ const MONGO_URI =
 
 async function startServer() {
   try {
+    // Connect to MongoDB
     await mongoose.connect(MONGO_URI);
-    console.log("MongoDB connected");
+    console.log("MongoDB connected successfully");
 
     const configuredInterval = Number(
       process.env.OVERSTAY_CHECK_INTERVAL_MS || 60_000
@@ -66,18 +29,22 @@ async function startServer() {
         ? configuredInterval
         : 60_000;
 
+    // Detect overdue parking sessions
     const detectOverstays = async () => {
       try {
         const result = await overstayService.detectOverstays();
 
         if (result.detected > 0) {
-          console.log(`Detected ${result.detected} overdue reservation(s)`);
+          console.log(
+            `Detected ${result.detected} overdue reservation(s)`
+          );
         }
       } catch (error) {
         console.error("Overstay detection failed:", error.message);
       }
     };
 
+    // Send reservation reminders
     const sendReminders = async () => {
       try {
         const result =
@@ -92,6 +59,8 @@ async function startServer() {
         console.error("Reservation reminders failed:", error.message);
       }
     };
+
+    // Expire subscriptions and abandoned payments
     const expireSubscriptionRecords = async () => {
       try {
         const result = await subscriptionService.expireSubscriptions();
@@ -106,23 +75,39 @@ async function startServer() {
       }
     };
 
-    // Start all background schedulers
-    setInterval(detectOverstays, overstayInterval).unref();
-    setInterval(sendReminders, overstayInterval).unref();
-    setInterval(expireSubscriptionRecords, overstayInterval).unref();
+    // Start background schedulers
+    const timers = [
+      setInterval(detectOverstays, overstayInterval),
+      setInterval(sendReminders, overstayInterval),
+      setInterval(expireSubscriptionRecords, overstayInterval)
+    ];
 
-    // Run each job once when the server starts
+    timers.forEach((timer) => timer.unref());
+
+    // Run each background job once at startup
     void detectOverstays();
     void sendReminders();
     void expireSubscriptionRecords();
-    app.listen(PORT, () => {
+
+    // Start Express server
+    const server = app.listen(PORT, () => {
       console.log(`Server running at http://localhost:${PORT}`);
     });
+
+    return server;
   } catch (error) {
-    console.error("MongoDB connection failed:");
+    console.error("Server startup failed:");
     console.error(error.message);
-    process.exit(1);
+    throw error;
   }
 }
 
-startServer();
+// Start server only when this file is executed directly.
+// Importing app.js will never start MongoDB or open a server.
+if (require.main === module) {
+  startServer().catch(() => {
+    process.exit(1);
+  });
+}
+
+module.exports = { startServer };

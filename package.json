@@ -1,12 +1,14 @@
+
 {
   "name": "g10-parking-backend",
   "version": "1.0.0",
-  "description": "Backend for the G10 Vehicle Parking System (FR-1 to FR-7)",
+  "description": "Backend for the G10 Vehicle Parking System (FR-1 to FR-9)",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
     "test": "node --test tests/*.test.js",
+    "lint": "eslint .",
     "demo": "node scripts/sprint1-demo.mjs"
   },
   "dependencies": {
@@ -17,7 +19,9 @@
     "qrcode": "^1.5.4"
   },
   "devDependencies": {
-    "jest": "^30.5.2",
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.15.0",
+    "globals": "^17.14.0",
     "supertest": "^7.3.1"
   }
 }
