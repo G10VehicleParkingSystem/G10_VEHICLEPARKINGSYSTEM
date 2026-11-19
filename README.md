@@ -38,8 +38,97 @@ Health check: `GET /api/health`
 Run the unit tests (no database needed):
 
 ```bash
-npm test
+npm test                 # unit tests (white-box)
+npm run test:coverage    # unit tests with code and branch coverage
+npm run reports          # full test reports in docs/reports (needs MongoDB)
 ```
+
+`npm run reports` runs the unit tests and the black-box system suite
+(`tests/blackbox/run-blackbox.mjs`) against a real server, measures coverage of
+both, and writes the coverage, white-box, black-box, traceability and test summary
+reports to [docs/reports](docs/reports/README.md). CI runs it on every push and keeps
+the result as the `test-reports` artifact.
+
+## Web front end (CampusPark)
+
+The React app in `frontend/` is the student and parking-office UI: book a spot,
+check in and out, pay, monthly pass, find your vehicle, fines, alerts, and the
+office report and slot map. Students and faculty create an account with their
+college email and sign in; the parking office signs in with the admin account
+(see Login below) and only sees the office screens.
+
+Development, with the backend already running:
+
+```bash
+cd frontend
+npm install
+API_URL=http://localhost:5000 npm run dev   # open http://localhost:5173
+```
+
+On macOS port 5000 is taken by AirPlay: start the backend with `PORT=5050` and use
+`API_URL=http://localhost:5050`.
+
+Production: `cd frontend && npm run build`, then `npm start` in the project root
+serves the app and the API together on one port. The Docker image does this for
+you.
+
+Run the end-to-end smoke test against a running server:
+
+```bash
+BASE_URL=http://localhost:5000/api ADMIN_EMAIL=... ADMIN_PASSWORD=... node scripts/smoke-test.mjs
+```
+
+The smoke test signs in as the parking office, so pass the same `ADMIN_EMAIL` and
+`ADMIN_PASSWORD` the server was started with.
+
+Run with Docker (MongoDB on the host):
+
+```bash
+docker build -t g10-parking .
+docker run -p 5000:5000 -e MONGO_URI=mongodb://host.docker.internal:27017/g10_vehicle_parking \
+  -e PAYMENT_GATEWAY=demo -e JWT_SECRET=<long random value> \
+  -e ADMIN_EMAIL=office@campuspark.test -e ADMIN_PASSWORD=<office password> g10-parking
+```
+
+Or pull the published image:
+`docker pull ghcr.io/g10vehicleparkingsystem/g10_vehicleparkingsystem:latest`
+
+## CI/CD pipeline
+
+The pipeline is two GitHub Actions workflows. CD only ever ships a commit that CI
+has already passed.
+
+**CI, continuous integration** (`.github/workflows/ci.yml`): checks every push to
+`main` and `feature/**` and every pull request. It never publishes anything.
+
+| Job | What it does |
+|---|---|
+| Backend Testing and Coverage | `npm ci`, lint, unit tests with c8 coverage (kept as the `g10-coverage-report` artifact), then starts the server against MongoDB and runs `scripts/smoke-test.mjs` |
+| Front End Build | builds the React app in `frontend/` and keeps it as the `campuspark-web` artifact |
+| Coverage and Test Reports | `npm run reports`: unit tests with coverage plus the black-box suite against a real server; keeps `docs/reports` as the `test-reports` artifact |
+| Build and Test Docker Image | builds the production image (API and web app), starts it and smoke tests the container |
+
+**CD, continuous delivery** (`.github/workflows/cd.yml`): starts automatically when
+CI succeeds for a push to `main`, and releases exactly the commit CI tested. It can
+also be run by hand from the Actions tab to redeploy `main`.
+
+| Job | What it does |
+|---|---|
+| Publish Docker Image | builds the image and publishes it to GitHub Container Registry as `sha-<commit>` and `latest` |
+| Deploy to Production | pulls the published image, verifies the release, triggers the live host and smoke tests it |
+
+The live site runs on Render (free plan) with MongoDB Atlas: https://g10-parking.onrender.com.
+The first request after 15 minutes without visitors takes about a minute while the
+free instance wakes up.
+
+To deploy to a live host (for example Render, with MongoDB Atlas), add a repository
+secret `DEPLOY_HOOK_URL` (the host's deploy hook) and a repository variable
+`PRODUCTION_URL` (the site's address). Set `JWT_SECRET`, `ADMIN_EMAIL` and
+`ADMIN_PASSWORD` on the host, and add the same admin login as repository secrets
+`ADMIN_EMAIL` and `ADMIN_PASSWORD` so the pipeline can smoke test the live site.
+Without them CD still publishes and verifies every release, and the live-host
+steps are skipped. Both workflows use a throwaway admin login and token secret,
+set in the workflow files, only for their test databases.
 
 ## Configuration
 
@@ -71,8 +160,27 @@ confirmed business price.
 
 ## API endpoints
 
-User-scoped routes take a temporary `userId` (24-character ObjectId) until
-authentication is added in Sprint 2 — see [deviation D-1](docs/DEVIATIONS.md).
+### Login and roles
+
+Every route except `/api/health` and `/api/auth/*` needs a signed-in user:
+send `Authorization: Bearer <token>`. Passwords are stored as bcrypt hashes and
+tokens are JWTs signed with `JWT_SECRET`.
+
+| Endpoint | Body | Notes |
+|---|---|---|
+| `POST /api/auth/register` | `{ "name", "email", "password", "role": "student" \| "faculty", "detail" }` | Password at least 8 characters. Sign-up can never create an admin. |
+| `POST /api/auth/login` | `{ "email", "password" }` | Returns `{ token, user }`. |
+| `GET /api/auth/me` | | The signed-in account. |
+
+The parking office (admin) account is created on start-up from `ADMIN_EMAIL` and
+`ADMIN_PASSWORD`. Only the admin can call `GET /api/analytics`, `POST /api/slots`,
+`POST /api/overstays/detect` and `POST /api/notifications`.
+
+The `userId` fields in the examples below now come from the token: for students
+and faculty any `userId` sent in the body or query is replaced by their own id,
+and `/my/:userId` style routes answer 403 for anyone else's id. The admin may name
+another user. Vehicles belong to the account that registered them
+(`GET /api/vehicles/mine`), and only the owner or the admin can look one up.
 
 ### FR-1 Vehicles and slots
 

@@ -1,0 +1,13 @@
+**/node_modules
+npm-debug.log*
+frontend/dist
+.git
+.github
+.env
+**/.DS_Store
+*.mp4
+*.code-workspace
+docs
+tests
+scripts
+README.md

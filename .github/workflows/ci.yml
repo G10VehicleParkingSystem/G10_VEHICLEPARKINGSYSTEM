@@ -1,0 +1,291 @@
+
+# Continuous integration: checks every change. Runs on pushes and pull requests and
+# never publishes or deploys anything. When it passes for a push to main, cd.yml
+# (continuous delivery) publishes the Docker image and deploys it.
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - "feature/**"
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  # A newer push to the same branch replaces an older run; main always finishes so
+  # that every commit on main gets its own CD run.
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+env:
+  NODE_VERSION: 22
+  # Throwaway parking office login and token secret for the CI test databases. The
+  # server creates this admin on start-up and the smoke test signs in with it.
+  ADMIN_EMAIL: office@campuspark.test
+  ADMIN_PASSWORD: ci-office-password
+  JWT_SECRET: ci-only-jwt-secret
+
+jobs:
+  backend-ci:
+    name: Backend Testing and Coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    services:
+      mongodb:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.adminCommand(\"ping\")'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      MONGO_URI: mongodb://127.0.0.1:27017/g10_vehicle_parking_ci
+      PAYMENT_GATEWAY: demo
+      PORT: 5000
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install Dependencies
+        run: npm ci
+
+      # Static analysis
+      - name: Run Lint
+        run: npm run lint --if-present
+
+      # White-box testing: execute unit tests and collect coverage
+      - name: Run Unit Tests
+        run: |
+          npx c8 --clean \
+            --all \
+            --include="src/**/*.js" \
+            --include="server.js" \
+            --reporter=none \
+            node --test --test-concurrency=1 tests/*.test.js
+
+      # Integration and API-level black-box tests
+      - name: Run Integration Tests
+        run: |
+          npx c8 --clean=false \
+            --all \
+            --include="src/**/*.js" \
+            --include="server.js" \
+            --reporter=none \
+            node --test --test-concurrency=1 tests/integration/*.test.js
+
+      # Existing unit and integration suites run on every push/PR,
+      # providing regression testing against previously working behaviour.
+
+      # Generate combined coverage report
+      - name: Generate Coverage Report
+        if: always()
+        run: |
+          npx c8 report \
+            --all \
+            --include="src/**/*.js" \
+            --include="server.js" \
+            --reporter=text \
+            --reporter=lcov \
+            --reporter=html \
+            --report-dir=coverage
+
+      - name: Upload Coverage Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: g10-coverage-report
+          path: coverage/
+          if-no-files-found: warn
+          retention-days: 14
+
+      # Smoke testing using the existing project smoke-test script
+      - name: Start Backend
+        if: success()
+        run: |
+          nohup npm start > server.log 2>&1 &
+        env:
+          PORT: 5000
+          MONGO_URI: mongodb://127.0.0.1:27017/g10_vehicle_parking_smoke
+          PAYMENT_GATEWAY: demo
+
+      - name: Run Smoke Tests
+        if: success()
+        run: node scripts/smoke-test.mjs
+        env:
+          BASE_URL: http://localhost:5000/api
+          SMOKE_WAIT_SECONDS: 60
+
+      - name: Show Backend Logs
+        if: always()
+        run: |
+          if [ -f server.log ]; then
+            cat server.log
+          fi
+
+  # Test reports: white-box unit tests with code and branch coverage, the black-box
+  # system suite against a real server and MongoDB, and the Markdown reports
+  # (scripts/generate-test-reports.mjs). The generated docs/reports folder is kept
+  # as a downloadable artifact.
+  test-reports:
+    name: Coverage and Test Reports
+    needs: backend-ci
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      mongo:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.runCommand({ ping: 1 })'"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Generate Test Reports
+        run: npm run reports
+        env:
+          REPORT_MONGO_URI: mongodb://127.0.0.1:27017/g10_ci_reports
+
+      - name: Coverage Summary
+        if: always()
+        run: |
+          if [ -f docs/reports/README.md ]; then
+            sed -n '/| Headline/,/^$/p' docs/reports/README.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload Test Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: docs/reports
+          retention-days: 30
+
+  # Runs alongside the backend job: the web front end must build.
+  frontend:
+    name: Front End Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Upload Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: campuspark-web
+          path: frontend/dist
+          retention-days: 7
+
+  # The production Docker image must build, start and pass the smoke test. Publishing
+  # it is CD's job (cd.yml).
+  docker:
+    name: Build and Test Docker Image
+    needs: [backend-ci, frontend]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      mongo:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.runCommand({ ping: 1 })'"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: g10-parking:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Start Container
+        run: |
+          docker run -d --name g10-parking --network host \
+            -e PORT=5000 \
+            -e MONGO_URI=mongodb://127.0.0.1:27017/g10_ci_container \
+            -e PAYMENT_GATEWAY=demo \
+            -e ADMIN_EMAIL -e ADMIN_PASSWORD -e JWT_SECRET \
+            g10-parking:test
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Smoke Test the Container
+        run: node scripts/smoke-test.mjs
+        env:
+          BASE_URL: http://localhost:5000/api
+
+      - name: Check the Web App Is Served
+        run: |
+          curl -fsS http://localhost:5000/ | grep -q "<title>CampusPark</title>"
+          curl -fsS http://localhost:5000/bookings | grep -q "<title>CampusPark</title>"
+          echo "The container serves the CampusPark web app."
+
+      - name: Show Container Log
+        if: always()
+        run: docker logs g10-parking

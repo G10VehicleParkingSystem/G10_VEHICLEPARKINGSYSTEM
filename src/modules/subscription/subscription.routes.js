@@ -1,5 +1,6 @@
 
 const express = require("express");
+const { ownUserParam } = require("../auth/auth.middleware");
 
 const {
   getMonthlyPlan,
@@ -10,6 +11,8 @@ const {
 } = require("./subscription.controller");
 
 const router = express.Router();
+
+router.param("userId", ownUserParam);
 
 router.get("/plans", getMonthlyPlan);
 router.post("/", createSubscription);

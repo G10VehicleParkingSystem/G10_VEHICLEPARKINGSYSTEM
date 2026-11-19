@@ -2,3 +2,8 @@ node_modules/
 .env
 npm-debug.log*
 .DS_Store
+frontend/dist/
+
+# Test coverage scratch output (the published reports live in docs/reports)
+coverage/
+.c8/

@@ -1,5 +1,6 @@
 
 const express = require("express");
+const { ownUserParam } = require("../auth/auth.middleware");
 
 const {
   createReview,
@@ -10,6 +11,8 @@ const {
 } = require("./review.controller");
 
 const router = express.Router();
+
+router.param("userId", ownUserParam);
 
 // Submit a review
 router.post("/", createReview);

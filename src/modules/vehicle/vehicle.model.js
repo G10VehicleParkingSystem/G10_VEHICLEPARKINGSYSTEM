@@ -33,6 +33,13 @@ const vehicleSchema = new mongoose.Schema(
       required: true,
       min: 0
     },
+    // Account that registered the vehicle. Older records may not have one.
+    owner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      index: true
+    },
+
     qrToken: {
       type: String,
       required: true,
