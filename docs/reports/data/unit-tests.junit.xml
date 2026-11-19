@@ -1,169 +1,169 @@
 <?xml version="1.0" encoding="utf-8"?>
 <testsuites>
-	<testcase name="NFR security: register stores a bcrypt hash, never the password" time="0.294759" classname="test" file="tests/auth-security.test.js"/>
-	<testcase name="NFR security: sign-up cannot create an admin account" time="0.000436" classname="test" file="tests/auth-security.test.js"/>
-	<testcase name="NFR security: short passwords and duplicate emails are refused" time="0.000164" classname="test" file="tests/auth-security.test.js"/>
-	<testcase name="NFR security: login checks the password against the hash" time="0.005394" classname="test" file="tests/auth-security.test.js"/>
-	<testcase name="NFR security: requests without a valid token get 401" time="0.000233" classname="test" file="tests/auth-security.test.js"/>
-	<testcase name="NFR security: the user id comes from the token, not the request" time="0.000237" classname="test" file="tests/auth-security.test.js"/>
-	<testcase name="NFR security: students only see their own records, the office sees anyone's" time="0.000272" classname="test" file="tests/auth-security.test.js"/>
-	<testcase name="NFR security: admin-only actions refuse students" time="0.000216" classname="test" file="tests/auth-security.test.js"/>
-	<testcase name="vehicle registration rejects missing details" time="0.000739" classname="test" file="tests/fr1-slot-recommendation.test.js"/>
-	<testcase name="vehicle registration rejects non-positive dimensions" time="0.000326" classname="test" file="tests/fr1-slot-recommendation.test.js"/>
-	<testcase name="vehicle registration stores the number in upper case" time="0.155095" classname="test" file="tests/fr1-slot-recommendation.test.js"/>
-	<testcase name="vehicle registration rejects duplicate vehicle numbers" time="0.000727" classname="test" file="tests/fr1-slot-recommendation.test.js"/>
-	<testcase name="vehicleFitsSlot compares every dimension" time="0.000195" classname="test" file="tests/fr1-slot-recommendation.test.js"/>
-	<testcase name="slot creation validates dimensions" time="0.000151" classname="test" file="tests/fr1-slot-recommendation.test.js"/>
-	<testcase name="recommendation queries available slots large enough for the vehicle" time="0.001910" classname="test" file="tests/fr1-slot-recommendation.test.js"/>
-	<testcase name="recommendation reports when no suitable slot is available" time="0.000196" classname="test" file="tests/fr1-slot-recommendation.test.js"/>
-	<testcase name="recommend controller requires a vehicle number" time="0.000093" classname="test" file="tests/fr1-slot-recommendation.test.js"/>
-	<testcase name="reservation controller requires all fields" time="0.000856" classname="test" file="tests/fr2-reservation.test.js"/>
-	<testcase name="reservation rejects invalid ids" time="0.000412" classname="test" file="tests/fr2-reservation.test.js"/>
-	<testcase name="reservation rejects an end time before the start time" time="0.000092" classname="test" file="tests/fr2-reservation.test.js"/>
-	<testcase name="reservation rejects a start time in the past" time="0.000077" classname="test" file="tests/fr2-reservation.test.js"/>
-	<testcase name="reservation rejects a vehicle that does not fit the slot" time="0.000488" classname="test" file="tests/fr2-reservation.test.js"/>
-	<testcase name="reservation rejects overlapping bookings for the same slot" time="0.001934" classname="test" file="tests/fr2-reservation.test.js"/>
-	<testcase name="a confirmed reservation sends a confirmation notification" time="0.002461" classname="test" file="tests/fr2-reservation.test.js"/>
-	<testcase name="cancellation is refused after the start time" time="0.000148" classname="test" file="tests/fr2-reservation.test.js"/>
-	<testcase name="cancellation marks the reservation cancelled" time="0.000093" classname="test" file="tests/fr2-reservation.test.js"/>
-	<testcase name="payment controller rejects missing payment fields" time="0.000573" classname="test" file="tests/fr3-fr5-validation.test.js"/>
-	<testcase name="payment controller rejects a missing payment method" time="0.000130" classname="test" file="tests/fr3-fr5-validation.test.js"/>
-	<testcase name="payment controller rejects an invalid payment method" time="0.000164" classname="test" file="tests/fr3-fr5-validation.test.js"/>
-	<testcase name="checkout controller rejects a missing userId" time="0.000073" classname="test" file="tests/fr3-fr5-validation.test.js"/>
-	<testcase name="payment gateway rejects missing configuration" time="0.000273" classname="test" file="tests/fr3-fr5-validation.test.js"/>
-	<testcase name="tracking requires a vehicle number" time="0.000642" classname="test" file="tests/fr4-tracking.test.js"/>
-	<testcase name="tracking reports an unknown vehicle" time="0.000365" classname="test" file="tests/fr4-tracking.test.js"/>
-	<testcase name="tracking returns the current slot and past sessions" time="0.000777" classname="test" file="tests/fr4-tracking.test.js"/>
-	<testcase name="check-in controller requires reservationId and userId" time="0.000239" classname="test" file="tests/fr4-tracking.test.js"/>
-	<testcase name="check-in is refused when the slot is occupied" time="0.000333" classname="test" file="tests/fr4-tracking.test.js"/>
-	<testcase name="check-in opens an active session and occupies the slot" time="0.001872" classname="test" file="tests/fr4-tracking.test.js"/>
-	<testcase name="completing a session releases the slot" time="0.000215" classname="test" file="tests/fr4-tracking.test.js"/>
-	<testcase name="analytics aggregates occupancy, vehicle types and revenue" time="0.023444" classname="test" file="tests/fr6-analytics.test.js"/>
-	<testcase name="analytics handles an empty facility" time="0.000393" classname="test" file="tests/fr6-analytics.test.js"/>
-	<testcase name="notification controller requires all fields" time="0.000838" classname="test" file="tests/fr7-notifications.test.js"/>
+	<testcase name="NFR security: register stores a bcrypt hash, never the password" time="0.260668" classname="test" file="tests/auth-security.test.js"/>
+	<testcase name="NFR security: sign-up cannot create an admin account" time="0.000459" classname="test" file="tests/auth-security.test.js"/>
+	<testcase name="NFR security: short passwords and duplicate emails are refused" time="0.000157" classname="test" file="tests/auth-security.test.js"/>
+	<testcase name="NFR security: login checks the password against the hash" time="0.005411" classname="test" file="tests/auth-security.test.js"/>
+	<testcase name="NFR security: requests without a valid token get 401" time="0.000245" classname="test" file="tests/auth-security.test.js"/>
+	<testcase name="NFR security: the user id comes from the token, not the request" time="0.000292" classname="test" file="tests/auth-security.test.js"/>
+	<testcase name="NFR security: students only see their own records, the office sees anyone's" time="0.000283" classname="test" file="tests/auth-security.test.js"/>
+	<testcase name="NFR security: admin-only actions refuse students" time="0.000227" classname="test" file="tests/auth-security.test.js"/>
+	<testcase name="vehicle registration rejects missing details" time="0.001778" classname="test" file="tests/fr1-slot-recommendation.test.js"/>
+	<testcase name="vehicle registration rejects non-positive dimensions" time="0.000253" classname="test" file="tests/fr1-slot-recommendation.test.js"/>
+	<testcase name="vehicle registration stores the number in upper case" time="0.168204" classname="test" file="tests/fr1-slot-recommendation.test.js"/>
+	<testcase name="vehicle registration rejects duplicate vehicle numbers" time="0.000207" classname="test" file="tests/fr1-slot-recommendation.test.js"/>
+	<testcase name="vehicleFitsSlot compares every dimension" time="0.000058" classname="test" file="tests/fr1-slot-recommendation.test.js"/>
+	<testcase name="slot creation validates dimensions" time="0.000095" classname="test" file="tests/fr1-slot-recommendation.test.js"/>
+	<testcase name="recommendation queries available slots large enough for the vehicle" time="0.000685" classname="test" file="tests/fr1-slot-recommendation.test.js"/>
+	<testcase name="recommendation reports when no suitable slot is available" time="0.000202" classname="test" file="tests/fr1-slot-recommendation.test.js"/>
+	<testcase name="recommend controller requires a vehicle number" time="0.000094" classname="test" file="tests/fr1-slot-recommendation.test.js"/>
+	<testcase name="reservation controller requires all fields" time="0.000890" classname="test" file="tests/fr2-reservation.test.js"/>
+	<testcase name="reservation rejects invalid ids" time="0.000724" classname="test" file="tests/fr2-reservation.test.js"/>
+	<testcase name="reservation rejects an end time before the start time" time="0.000371" classname="test" file="tests/fr2-reservation.test.js"/>
+	<testcase name="reservation rejects a start time in the past" time="0.001425" classname="test" file="tests/fr2-reservation.test.js"/>
+	<testcase name="reservation rejects a vehicle that does not fit the slot" time="0.006059" classname="test" file="tests/fr2-reservation.test.js"/>
+	<testcase name="reservation rejects overlapping bookings for the same slot" time="0.003153" classname="test" file="tests/fr2-reservation.test.js"/>
+	<testcase name="a confirmed reservation sends a confirmation notification" time="0.001354" classname="test" file="tests/fr2-reservation.test.js"/>
+	<testcase name="cancellation is refused after the start time" time="0.000357" classname="test" file="tests/fr2-reservation.test.js"/>
+	<testcase name="cancellation marks the reservation cancelled" time="0.000144" classname="test" file="tests/fr2-reservation.test.js"/>
+	<testcase name="payment controller rejects missing payment fields" time="0.000816" classname="test" file="tests/fr3-fr5-validation.test.js"/>
+	<testcase name="payment controller rejects a missing payment method" time="0.000127" classname="test" file="tests/fr3-fr5-validation.test.js"/>
+	<testcase name="payment controller rejects an invalid payment method" time="0.000138" classname="test" file="tests/fr3-fr5-validation.test.js"/>
+	<testcase name="checkout controller rejects a missing userId" time="0.000071" classname="test" file="tests/fr3-fr5-validation.test.js"/>
+	<testcase name="payment gateway rejects missing configuration" time="0.000268" classname="test" file="tests/fr3-fr5-validation.test.js"/>
+	<testcase name="tracking requires a vehicle number" time="0.001407" classname="test" file="tests/fr4-tracking.test.js"/>
+	<testcase name="tracking reports an unknown vehicle" time="0.000426" classname="test" file="tests/fr4-tracking.test.js"/>
+	<testcase name="tracking returns the current slot and past sessions" time="0.000521" classname="test" file="tests/fr4-tracking.test.js"/>
+	<testcase name="check-in controller requires reservationId and userId" time="0.000220" classname="test" file="tests/fr4-tracking.test.js"/>
+	<testcase name="check-in is refused when the slot is occupied" time="0.000380" classname="test" file="tests/fr4-tracking.test.js"/>
+	<testcase name="check-in opens an active session and occupies the slot" time="0.000695" classname="test" file="tests/fr4-tracking.test.js"/>
+	<testcase name="completing a session releases the slot" time="0.000168" classname="test" file="tests/fr4-tracking.test.js"/>
+	<testcase name="analytics aggregates occupancy, vehicle types and revenue" time="0.009605" classname="test" file="tests/fr6-analytics.test.js"/>
+	<testcase name="analytics handles an empty facility" time="0.000305" classname="test" file="tests/fr6-analytics.test.js"/>
+	<testcase name="notification controller requires all fields" time="0.000796" classname="test" file="tests/fr7-notifications.test.js"/>
 	<testcase name="reminders notify upcoming and expiring reservations once each" time="0.001042" classname="test" file="tests/fr7-notifications.test.js"/>
-	<testcase name="a failed payment is recorded and notified" time="0.000816" classname="test" file="tests/fr7-notifications.test.js"/>
-	<testcase name="a successful payment is notified as successful" time="0.000317" classname="test" file="tests/fr7-notifications.test.js"/>
-	<testcase name="monthly period handles January month-end correctly in a leap year" time="0.001841" classname="test" file="tests/fr8-subscription.test.js"/>
-	<testcase name="monthly period handles December to January correctly" time="0.000092" classname="test" file="tests/fr8-subscription.test.js"/>
-	<testcase name="monthly period rejects an invalid date" time="0.000237" classname="test" file="tests/fr8-subscription.test.js"/>
-	<testcase name="monthly plan uses the configured subscription rate" time="0.000111" classname="test" file="tests/fr8-subscription.test.js"/>
-	<testcase name="monthly plan rejects a non-positive configured rate" time="0.000068" classname="test" file="tests/fr8-subscription.test.js"/>
-	<testcase name="expiry marks ended subscriptions expired and clears abandoned payments" time="0.000628" classname="test" file="tests/fr8-subscription.test.js"/>
+	<testcase name="a failed payment is recorded and notified" time="0.001342" classname="test" file="tests/fr7-notifications.test.js"/>
+	<testcase name="a successful payment is notified as successful" time="0.000802" classname="test" file="tests/fr7-notifications.test.js"/>
+	<testcase name="monthly period handles January month-end correctly in a leap year" time="0.006638" classname="test" file="tests/fr8-subscription.test.js"/>
+	<testcase name="monthly period handles December to January correctly" time="0.000089" classname="test" file="tests/fr8-subscription.test.js"/>
+	<testcase name="monthly period rejects an invalid date" time="0.000213" classname="test" file="tests/fr8-subscription.test.js"/>
+	<testcase name="monthly plan uses the configured subscription rate" time="0.000091" classname="test" file="tests/fr8-subscription.test.js"/>
+	<testcase name="monthly plan rejects a non-positive configured rate" time="0.000064" classname="test" file="tests/fr8-subscription.test.js"/>
+	<testcase name="expiry marks ended subscriptions expired and clears abandoned payments" time="0.000626" classname="test" file="tests/fr8-subscription.test.js"/>
 	<testcase name="subscription creation controller rejects missing fields" time="0.000101" classname="test" file="tests/fr8-subscription.test.js"/>
-	<testcase name="subscription creation service rejects invalid user IDs" time="0.000245" classname="test" file="tests/fr8-subscription.test.js"/>
+	<testcase name="subscription creation service rejects invalid user IDs" time="0.000235" classname="test" file="tests/fr8-subscription.test.js"/>
 	<testcase name="subscription listing rejects an invalid user ID" time="0.000139" classname="test" file="tests/fr8-subscription.test.js"/>
-	<testcase name="subscription renewal controller rejects missing payment details" time="0.000077" classname="test" file="tests/fr8-subscription.test.js"/>
-	<testcase name="subscription cancellation controller rejects a missing user ID" time="0.000062" classname="test" file="tests/fr8-subscription.test.js"/>
-	<testcase name="review is created after a completed parking session" time="0.001290" classname="test" file="tests/fr9-reviews.test.js"/>
-	<testcase name="review rejects reservation not belonging to the user" time="0.000316" classname="test" file="tests/fr9-reviews.test.js"/>
-	<testcase name="review is rejected when parking session is not completed" time="0.000182" classname="test" file="tests/fr9-reviews.test.js"/>
-	<testcase name="reviews are retrieved using the correct slot ID" time="0.007113" classname="test" file="tests/fr9-reviews.test.js"/>
-	<testcase name="reviews are retrieved using the correct user ID" time="0.000233" classname="test" file="tests/fr9-reviews.test.js"/>
-	<testcase name="review is updated with the correct user ownership filter" time="0.000180" classname="test" file="tests/fr9-reviews.test.js"/>
-	<testcase name="review deletion uses the correct user ownership filter" time="0.000113" classname="test" file="tests/fr9-reviews.test.js"/>
-	<testcase name="slot rating calculates average and total review count" time="0.000194" classname="test" file="tests/fr9-reviews.test.js"/>
-	<testcase name="slot rating returns zero when no reviews exist" time="0.000099" classname="test" file="tests/fr9-reviews.test.js"/>
-	<testcase name="review controller rejects decimal ratings" time="0.000237" classname="test" file="tests/fr9-reviews.test.js"/>
-	<testcase name="duplicate review error returns HTTP 409" time="0.000177" classname="test" file="tests/fr9-reviews.test.js"/>
-	<testcase name="reservation charge bills each started hour at the configured rate" time="0.000513" classname="test" file="tests/payment-calculations.test.js"/>
-	<testcase name="overstay fine bills each started hour and reports overdue minutes" time="0.000504" classname="test" file="tests/payment-calculations.test.js"/>
-	<testcase name="no fine accrues at or before the reservation end time" time="0.000055" classname="test" file="tests/payment-calculations.test.js"/>
-	<testcase name="billing rejects invalid rates and time ranges" time="0.001412" classname="test" file="tests/payment-calculations.test.js"/>
-	<testcase name="WB-CTL analytics.getAnalytics: valid input -> 200, service error -> 500" time="0.007794" classname="test" file="tests/wb-controllers.test.js"/>
-	<testcase name="WB-CTL slot.createSlot: valid input -> 201, service error -> 400" time="0.003442" classname="test" file="tests/wb-controllers.test.js"/>
-	<testcase name="WB-CTL slot.getSlots: valid input -> 200, service error -> 500" time="0.000161" classname="test" file="tests/wb-controllers.test.js"/>
-	<testcase name="WB-CTL slot.recommendSlot: valid input -> 200, service error -> 500, 1 invalid input(s) -> 400" time="0.000154" classname="test" file="tests/wb-controllers.test.js"/>
-	<testcase name="WB-CTL reservation.createReservation: valid input -> 201, service error -> 400, 1 invalid input(s) -> 400" time="0.001010" classname="test" file="tests/wb-controllers.test.js"/>
-	<testcase name="WB-CTL reservation.getMyReservations: valid input -> 200, service error -> 500" time="0.000112" classname="test" file="tests/wb-controllers.test.js"/>
-	<testcase name="WB-CTL reservation.cancelReservation: valid input -> 200, service error -> 400" time="0.006284" classname="test" file="tests/wb-controllers.test.js"/>
-	<testcase name="WB-CTL payment.payForReservation: valid input -> 201, service error -> 400, 2 invalid input(s) -> 400" time="0.001214" classname="test" file="tests/wb-controllers.test.js"/>
-	<testcase name="WB-CTL payment.payFine: valid input -> 201, service error -> 400, 1 invalid input(s) -> 400" time="0.000123" classname="test" file="tests/wb-controllers.test.js"/>
-	<testcase name="WB-CTL payment.getTransactions: valid input -> 200, service error -> 500" time="0.000094" classname="test" file="tests/wb-controllers.test.js"/>
-	<testcase name="WB-CTL overstay.detectOverstays: valid input -> 200, service error -> 500" time="0.001859" classname="test" file="tests/wb-controllers.test.js"/>
-	<testcase name="WB-CTL overstay.getFines: valid input -> 200, service error -> 500" time="0.000121" classname="test" file="tests/wb-controllers.test.js"/>
+	<testcase name="subscription renewal controller rejects missing payment details" time="0.000067" classname="test" file="tests/fr8-subscription.test.js"/>
+	<testcase name="subscription cancellation controller rejects a missing user ID" time="0.000058" classname="test" file="tests/fr8-subscription.test.js"/>
+	<testcase name="review is created after a completed parking session" time="0.002693" classname="test" file="tests/fr9-reviews.test.js"/>
+	<testcase name="review rejects reservation not belonging to the user" time="0.000389" classname="test" file="tests/fr9-reviews.test.js"/>
+	<testcase name="review is rejected when parking session is not completed" time="0.000188" classname="test" file="tests/fr9-reviews.test.js"/>
+	<testcase name="reviews are retrieved using the correct slot ID" time="0.000555" classname="test" file="tests/fr9-reviews.test.js"/>
+	<testcase name="reviews are retrieved using the correct user ID" time="0.000118" classname="test" file="tests/fr9-reviews.test.js"/>
+	<testcase name="review is updated with the correct user ownership filter" time="0.000148" classname="test" file="tests/fr9-reviews.test.js"/>
+	<testcase name="review deletion uses the correct user ownership filter" time="0.000107" classname="test" file="tests/fr9-reviews.test.js"/>
+	<testcase name="slot rating calculates average and total review count" time="0.000171" classname="test" file="tests/fr9-reviews.test.js"/>
+	<testcase name="slot rating returns zero when no reviews exist" time="0.000098" classname="test" file="tests/fr9-reviews.test.js"/>
+	<testcase name="review controller rejects decimal ratings" time="0.000208" classname="test" file="tests/fr9-reviews.test.js"/>
+	<testcase name="duplicate review error returns HTTP 409" time="0.000920" classname="test" file="tests/fr9-reviews.test.js"/>
+	<testcase name="reservation charge bills each started hour at the configured rate" time="0.000823" classname="test" file="tests/payment-calculations.test.js"/>
+	<testcase name="overstay fine bills each started hour and reports overdue minutes" time="0.001365" classname="test" file="tests/payment-calculations.test.js"/>
+	<testcase name="no fine accrues at or before the reservation end time" time="0.000627" classname="test" file="tests/payment-calculations.test.js"/>
+	<testcase name="billing rejects invalid rates and time ranges" time="0.001585" classname="test" file="tests/payment-calculations.test.js"/>
+	<testcase name="WB-CTL analytics.getAnalytics: valid input -> 200, service error -> 500" time="0.016115" classname="test" file="tests/wb-controllers.test.js"/>
+	<testcase name="WB-CTL slot.createSlot: valid input -> 201, service error -> 400" time="0.003540" classname="test" file="tests/wb-controllers.test.js"/>
+	<testcase name="WB-CTL slot.getSlots: valid input -> 200, service error -> 500" time="0.000369" classname="test" file="tests/wb-controllers.test.js"/>
+	<testcase name="WB-CTL slot.recommendSlot: valid input -> 200, service error -> 500, 1 invalid input(s) -> 400" time="0.000232" classname="test" file="tests/wb-controllers.test.js"/>
+	<testcase name="WB-CTL reservation.createReservation: valid input -> 201, service error -> 400, 1 invalid input(s) -> 400" time="0.001077" classname="test" file="tests/wb-controllers.test.js"/>
+	<testcase name="WB-CTL reservation.getMyReservations: valid input -> 200, service error -> 500" time="0.000111" classname="test" file="tests/wb-controllers.test.js"/>
+	<testcase name="WB-CTL reservation.cancelReservation: valid input -> 200, service error -> 400" time="0.000108" classname="test" file="tests/wb-controllers.test.js"/>
+	<testcase name="WB-CTL payment.payForReservation: valid input -> 201, service error -> 400, 2 invalid input(s) -> 400" time="0.000974" classname="test" file="tests/wb-controllers.test.js"/>
+	<testcase name="WB-CTL payment.payFine: valid input -> 201, service error -> 400, 1 invalid input(s) -> 400" time="0.000127" classname="test" file="tests/wb-controllers.test.js"/>
+	<testcase name="WB-CTL payment.getTransactions: valid input -> 200, service error -> 500" time="0.000102" classname="test" file="tests/wb-controllers.test.js"/>
+	<testcase name="WB-CTL overstay.detectOverstays: valid input -> 200, service error -> 500" time="0.000922" classname="test" file="tests/wb-controllers.test.js"/>
+	<testcase name="WB-CTL overstay.getFines: valid input -> 200, service error -> 500" time="0.000102" classname="test" file="tests/wb-controllers.test.js"/>
 	<testcase name="WB-CTL overstay.checkout: valid input -> 200, service error -> 400, 1 invalid input(s) -> 400" time="0.000114" classname="test" file="tests/wb-controllers.test.js"/>
-	<testcase name="WB-CTL parking.checkIn: valid input -> 201, service error -> 400, 1 invalid input(s) -> 400" time="0.000250" classname="test" file="tests/wb-controllers.test.js"/>
-	<testcase name="WB-CTL parking.checkInSubscription: valid input -> 201, service error -> 400, 1 invalid input(s) -> 400" time="0.000107" classname="test" file="tests/wb-controllers.test.js"/>
-	<testcase name="WB-CTL parking.checkOutSubscription: valid input -> 200, service error -> 400, 1 invalid input(s) -> 400" time="0.000089" classname="test" file="tests/wb-controllers.test.js"/>
-	<testcase name="WB-CTL parking.getVehicleTracking: valid input -> 200, service error -> 404" time="0.000077" classname="test" file="tests/wb-controllers.test.js"/>
-	<testcase name="WB-CTL notification.createNotification: valid input -> 201, service error -> 400, 1 invalid input(s) -> 400" time="0.002474" classname="test" file="tests/wb-controllers.test.js"/>
-	<testcase name="WB-CTL notification.getNotifications: valid input -> 200, service error -> 500" time="0.000121" classname="test" file="tests/wb-controllers.test.js"/>
-	<testcase name="WB-CTL subscription.getMonthlyPlan: valid input -> 200, service error -> 400" time="0.001227" classname="test" file="tests/wb-controllers.test.js"/>
-	<testcase name="WB-CTL subscription.createSubscription: valid input -> 201, service error -> 400, 1 invalid input(s) -> 400" time="0.000174" classname="test" file="tests/wb-controllers.test.js"/>
-	<testcase name="WB-CTL subscription.getMySubscriptions: valid input -> 200, service error -> 400" time="0.000100" classname="test" file="tests/wb-controllers.test.js"/>
-	<testcase name="WB-CTL subscription.renewSubscription: valid input -> 201, service error -> 400, 1 invalid input(s) -> 400" time="0.000111" classname="test" file="tests/wb-controllers.test.js"/>
-	<testcase name="WB-CTL subscription.cancelSubscription: valid input -> 200, service error -> 400, 1 invalid input(s) -> 400" time="0.000103" classname="test" file="tests/wb-controllers.test.js"/>
-	<testcase name="WB-CTL review.getReviewsBySlot: valid input -> 200, service error -> 500, 1 invalid input(s) -> 400" time="0.001200" classname="test" file="tests/wb-controllers.test.js"/>
-	<testcase name="WB-CTL review.getReviewsByUser: valid input -> 200, service error -> 500, 1 invalid input(s) -> 400" time="0.000101" classname="test" file="tests/wb-controllers.test.js"/>
-	<testcase name="WB-CTL review.updateReview: valid input -> 200, service error -> 400, 5 invalid input(s) -> 400" time="0.000137" classname="test" file="tests/wb-controllers.test.js"/>
-	<testcase name="WB-CTL review.deleteReview: valid input -> 200, service error -> 500, 1 invalid input(s) -> 400" time="0.000091" classname="test" file="tests/wb-controllers.test.js"/>
-	<testcase name="WB-CTL vehicle.getVehicle: valid input -> 200, service error -> 404" time="0.006200" classname="test" file="tests/wb-controllers.test.js"/>
-	<testcase name="WB-CTL vehicle.getVehicleQr: valid input -> 200, service error -> 404" time="0.000108" classname="test" file="tests/wb-controllers.test.js"/>
-	<testcase name="WB-CTL vehicle.verifyVehicleQr: valid input -> 200, service error -> 400" time="0.000090" classname="test" file="tests/wb-controllers.test.js"/>
-	<testcase name="WB-CTL vehicle.getMyVehicles: valid input -> 200, service error -> 500" time="0.000097" classname="test" file="tests/wb-controllers.test.js"/>
-	<testcase name="WB-CTL vehicle.registerVehicle passes the signed-in owner and answers 201 / 400" time="0.000200" classname="test" file="tests/wb-controllers.test.js"/>
-	<testcase name="WB-CTL vehicle.ownVehicleOnly: owner passes, others get 403, errors 500" time="0.000190" classname="test" file="tests/wb-controllers.test.js"/>
-	<testcase name="WB-CTL review update / delete answer 404 when the review is not the user's" time="0.000140" classname="test" file="tests/wb-controllers.test.js"/>
-	<testcase name="WB-CTL notification.markNotificationAsRead: 200, 404 when missing, 500 on error" time="0.000155" classname="test" file="tests/wb-controllers.test.js"/>
-	<testcase name="WB-CTL auth controller: register 201, login 200, me 200, and errors keep their status" time="0.023551" classname="test" file="tests/wb-controllers.test.js"/>
-	<testcase name="WB-OVR-01 detectOverstays fines an overdue booking and alerts the user once" time="0.001412" classname="test" file="tests/wb-overstay-parking.test.js"/>
-	<testcase name="WB-OVR-02 an existing fine is updated without a second alert, and no session gives sessionId null" time="0.000282" classname="test" file="tests/wb-overstay-parking.test.js"/>
-	<testcase name="WB-OVR-03 boundary: a booking that ends exactly now is not fined" time="0.000571" classname="test" file="tests/wb-overstay-parking.test.js"/>
-	<testcase name="WB-OVR-04 getUserFines filters by user and sorts newest first" time="0.000128" classname="test" file="tests/wb-overstay-parking.test.js"/>
-	<testcase name="WB-OVR-05 checkout refuses an unknown or cancelled reservation" time="0.000396" classname="test" file="tests/wb-overstay-parking.test.js"/>
-	<testcase name="WB-OVR-06 checkout of a late booking completes it, fines it and frees the slot" time="0.000333" classname="test" file="tests/wb-overstay-parking.test.js"/>
-	<testcase name="WB-OVR-07 checkout on time keeps no fine; an already completed booking is returned as is" time="0.000222" classname="test" file="tests/wb-overstay-parking.test.js"/>
-	<testcase name="WB-PRK-01 checkIn rejects unknown, unconfirmed and finished bookings" time="0.000217" classname="test" file="tests/wb-overstay-parking.test.js"/>
-	<testcase name="WB-PRK-02 checkIn rejects a second check-in and an occupied slot" time="0.000200" classname="test" file="tests/wb-overstay-parking.test.js"/>
-	<testcase name="WB-PRK-03 checkIn occupies the slot and opens an ACTIVE session" time="0.000149" classname="test" file="tests/wb-overstay-parking.test.js"/>
-	<testcase name="WB-PRK-04 checkIn frees the slot again when the session cannot be saved" time="0.000196" classname="test" file="tests/wb-overstay-parking.test.js"/>
-	<testcase name="WB-PRK-05 completeSession frees the slot only when a session was active" time="0.000126" classname="test" file="tests/wb-overstay-parking.test.js"/>
-	<testcase name="WB-PRK-06 subscription check-in covers no pass, already in, slot taken, success and rollback" time="0.000467" classname="test" file="tests/wb-overstay-parking.test.js"/>
-	<testcase name="WB-PRK-07 subscription check-out needs an active session and frees the slot" time="0.000160" classname="test" file="tests/wb-overstay-parking.test.js"/>
-	<testcase name="WB-PRK-08 vehicle tracking: missing number, unknown vehicle, parked and not parked" time="0.000277" classname="test" file="tests/wb-overstay-parking.test.js"/>
-	<testcase name="WB-PAY-01 an unknown payment method is refused before anything is read" time="0.001043" classname="test" file="tests/wb-payment-subscription.test.js"/>
-	<testcase name="WB-PAY-02 paying for someone else's or an unknown booking fails" time="0.000388" classname="test" file="tests/wb-payment-subscription.test.js"/>
-	<testcase name="WB-PAY-03 a booking that is already paid returns the earlier payment (no double charge)" time="0.000306" classname="test" file="tests/wb-payment-subscription.test.js"/>
-	<testcase name="WB-PAY-04 only confirmed bookings can be paid" time="0.000227" classname="test" file="tests/wb-payment-subscription.test.js"/>
-	<testcase name="WB-PAY-05 a successful payment charges each started hour and sends a payment alert" time="0.001063" classname="test" file="tests/wb-payment-subscription.test.js"/>
-	<testcase name="WB-PAY-06 a gateway failure records a FAILED payment and tells the user" time="0.003307" classname="test" file="tests/wb-payment-subscription.test.js"/>
-	<testcase name="WB-PAY-07 two payments racing for one booking: the duplicate-key loser returns the winner's payment" time="0.000835" classname="test" file="tests/wb-payment-subscription.test.js"/>
-	<testcase name="WB-PAY-08 fines: unknown fine, already paid, and not checked out yet are refused" time="0.000356" classname="test" file="tests/wb-payment-subscription.test.js"/>
-	<testcase name="WB-PAY-09 a fine whose payment already went through is marked PAID without charging again" time="0.000168" classname="test" file="tests/wb-payment-subscription.test.js"/>
-	<testcase name="WB-PAY-10 paying a fine after checkout charges the fine amount and marks it PAID" time="0.000243" classname="test" file="tests/wb-payment-subscription.test.js"/>
-	<testcase name="WB-PAY-11 fine payment races: duplicate key returns the saved payment, other errors propagate" time="0.000300" classname="test" file="tests/wb-payment-subscription.test.js"/>
-	<testcase name="WB-PAY-12 subscription payment checks amount and period (boundary values 0, -1, NaN)" time="0.000152" classname="test" file="tests/wb-payment-subscription.test.js"/>
-	<testcase name="WB-PAY-13 subscription payment: retry returns the saved payment, new period charges once" time="0.000262" classname="test" file="tests/wb-payment-subscription.test.js"/>
-	<testcase name="WB-PAY-14 subscription payment error: recovers a saved payment, otherwise rethrows" time="0.000234" classname="test" file="tests/wb-payment-subscription.test.js"/>
-	<testcase name="WB-PAY-15 transaction history is the user's payments, newest first" time="0.000119" classname="test" file="tests/wb-payment-subscription.test.js"/>
-	<testcase name="WB-SUB-01 buying a pass: vehicle and slot must exist, be free, fit, and not be booked" time="0.001834" classname="test" file="tests/wb-payment-subscription.test.js"/>
-	<testcase name="WB-SUB-02 buying a pass activates it once the payment succeeds" time="0.000458" classname="test" file="tests/wb-payment-subscription.test.js"/>
-	<testcase name="WB-SUB-03 a failed pass payment marks it PAYMENT_FAILED and releases the slot lock" time="0.000309" classname="test" file="tests/wb-payment-subscription.test.js"/>
-	<testcase name="WB-SUB-04 renewing: unknown or inactive passes are refused; an active one extends by a month" time="0.002064" classname="test" file="tests/wb-payment-subscription.test.js"/>
-	<testcase name="WB-SUB-05 stopping renewal: not found, not active, already stopped, then success" time="0.001630" classname="test" file="tests/wb-payment-subscription.test.js"/>
-	<testcase name="WB-SUB-06 listing my passes expires old ones first and sorts newest first" time="0.000193" classname="test" file="tests/wb-payment-subscription.test.js"/>
-	<testcase name="WB-VEH-01 registration rejects non-numeric sizes and stores the owner when signed in" time="0.048331" classname="test" file="tests/wb-vehicle-slot-auth.test.js"/>
-	<testcase name="WB-VEH-02 getVehicle finds by upper-case number or reports not found" time="0.000642" classname="test" file="tests/wb-vehicle-slot-auth.test.js"/>
-	<testcase name="WB-VEH-03 QR pass: unknown vehicle, old record gets a token, existing token is reused" time="0.082510" classname="test" file="tests/wb-vehicle-slot-auth.test.js"/>
-	<testcase name="WB-VEH-04 QR scan: missing or wrong token is refused, a valid one returns the vehicle without the token" time="0.000318" classname="test" file="tests/wb-vehicle-slot-auth.test.js"/>
-	<testcase name="WB-VEH-05 ownership: admin sees all; owner yes; other student no; unowned or unknown vehicles stay open" time="0.000261" classname="test" file="tests/wb-vehicle-slot-auth.test.js"/>
-	<testcase name="WB-VEH-06 my vehicles are filtered by owner, newest first" time="0.000106" classname="test" file="tests/wb-vehicle-slot-auth.test.js"/>
-	<testcase name="WB-SLT-01 createSlot: missing fields, non-numeric sizes, duplicate number, and success" time="0.000207" classname="test" file="tests/wb-vehicle-slot-auth.test.js"/>
-	<testcase name="WB-SLT-02 getSlots filters by an upper-cased status only when one is given" time="0.000102" classname="test" file="tests/wb-vehicle-slot-auth.test.js"/>
+	<testcase name="WB-CTL parking.checkIn: valid input -> 201, service error -> 400, 1 invalid input(s) -> 400" time="0.000213" classname="test" file="tests/wb-controllers.test.js"/>
+	<testcase name="WB-CTL parking.checkInSubscription: valid input -> 201, service error -> 400, 1 invalid input(s) -> 400" time="0.000098" classname="test" file="tests/wb-controllers.test.js"/>
+	<testcase name="WB-CTL parking.checkOutSubscription: valid input -> 200, service error -> 400, 1 invalid input(s) -> 400" time="0.000098" classname="test" file="tests/wb-controllers.test.js"/>
+	<testcase name="WB-CTL parking.getVehicleTracking: valid input -> 200, service error -> 404" time="0.000081" classname="test" file="tests/wb-controllers.test.js"/>
+	<testcase name="WB-CTL notification.createNotification: valid input -> 201, service error -> 400, 1 invalid input(s) -> 400" time="0.000217" classname="test" file="tests/wb-controllers.test.js"/>
+	<testcase name="WB-CTL notification.getNotifications: valid input -> 200, service error -> 500" time="0.000081" classname="test" file="tests/wb-controllers.test.js"/>
+	<testcase name="WB-CTL subscription.getMonthlyPlan: valid input -> 200, service error -> 400" time="0.000393" classname="test" file="tests/wb-controllers.test.js"/>
+	<testcase name="WB-CTL subscription.createSubscription: valid input -> 201, service error -> 400, 1 invalid input(s) -> 400" time="0.000103" classname="test" file="tests/wb-controllers.test.js"/>
+	<testcase name="WB-CTL subscription.getMySubscriptions: valid input -> 200, service error -> 400" time="0.000075" classname="test" file="tests/wb-controllers.test.js"/>
+	<testcase name="WB-CTL subscription.renewSubscription: valid input -> 201, service error -> 400, 1 invalid input(s) -> 400" time="0.000092" classname="test" file="tests/wb-controllers.test.js"/>
+	<testcase name="WB-CTL subscription.cancelSubscription: valid input -> 200, service error -> 400, 1 invalid input(s) -> 400" time="0.000088" classname="test" file="tests/wb-controllers.test.js"/>
+	<testcase name="WB-CTL review.getReviewsBySlot: valid input -> 200, service error -> 500, 1 invalid input(s) -> 400" time="0.000986" classname="test" file="tests/wb-controllers.test.js"/>
+	<testcase name="WB-CTL review.getReviewsByUser: valid input -> 200, service error -> 500, 1 invalid input(s) -> 400" time="0.000090" classname="test" file="tests/wb-controllers.test.js"/>
+	<testcase name="WB-CTL review.updateReview: valid input -> 200, service error -> 400, 5 invalid input(s) -> 400" time="0.000127" classname="test" file="tests/wb-controllers.test.js"/>
+	<testcase name="WB-CTL review.deleteReview: valid input -> 200, service error -> 500, 1 invalid input(s) -> 400" time="0.000087" classname="test" file="tests/wb-controllers.test.js"/>
+	<testcase name="WB-CTL vehicle.getVehicle: valid input -> 200, service error -> 404" time="0.007149" classname="test" file="tests/wb-controllers.test.js"/>
+	<testcase name="WB-CTL vehicle.getVehicleQr: valid input -> 200, service error -> 404" time="0.000106" classname="test" file="tests/wb-controllers.test.js"/>
+	<testcase name="WB-CTL vehicle.verifyVehicleQr: valid input -> 200, service error -> 400" time="0.000084" classname="test" file="tests/wb-controllers.test.js"/>
+	<testcase name="WB-CTL vehicle.getMyVehicles: valid input -> 200, service error -> 500" time="0.000090" classname="test" file="tests/wb-controllers.test.js"/>
+	<testcase name="WB-CTL vehicle.registerVehicle passes the signed-in owner and answers 201 / 400" time="0.000195" classname="test" file="tests/wb-controllers.test.js"/>
+	<testcase name="WB-CTL vehicle.ownVehicleOnly: owner passes, others get 403, errors 500" time="0.000179" classname="test" file="tests/wb-controllers.test.js"/>
+	<testcase name="WB-CTL review update / delete answer 404 when the review is not the user's" time="0.000138" classname="test" file="tests/wb-controllers.test.js"/>
+	<testcase name="WB-CTL notification.markNotificationAsRead: 200, 404 when missing, 500 on error" time="0.000164" classname="test" file="tests/wb-controllers.test.js"/>
+	<testcase name="WB-CTL auth controller: register 201, login 200, me 200, and errors keep their status" time="0.014315" classname="test" file="tests/wb-controllers.test.js"/>
+	<testcase name="WB-OVR-01 detectOverstays fines an overdue booking and alerts the user once" time="0.001434" classname="test" file="tests/wb-overstay-parking.test.js"/>
+	<testcase name="WB-OVR-02 an existing fine is updated without a second alert, and no session gives sessionId null" time="0.000290" classname="test" file="tests/wb-overstay-parking.test.js"/>
+	<testcase name="WB-OVR-03 boundary: a booking that ends exactly now is not fined" time="0.000569" classname="test" file="tests/wb-overstay-parking.test.js"/>
+	<testcase name="WB-OVR-04 getUserFines filters by user and sorts newest first" time="0.000130" classname="test" file="tests/wb-overstay-parking.test.js"/>
+	<testcase name="WB-OVR-05 checkout refuses an unknown or cancelled reservation" time="0.000360" classname="test" file="tests/wb-overstay-parking.test.js"/>
+	<testcase name="WB-OVR-06 checkout of a late booking completes it, fines it and frees the slot" time="0.000353" classname="test" file="tests/wb-overstay-parking.test.js"/>
+	<testcase name="WB-OVR-07 checkout on time keeps no fine; an already completed booking is returned as is" time="0.000261" classname="test" file="tests/wb-overstay-parking.test.js"/>
+	<testcase name="WB-PRK-01 checkIn rejects unknown, unconfirmed and finished bookings" time="0.000244" classname="test" file="tests/wb-overstay-parking.test.js"/>
+	<testcase name="WB-PRK-02 checkIn rejects a second check-in and an occupied slot" time="0.000182" classname="test" file="tests/wb-overstay-parking.test.js"/>
+	<testcase name="WB-PRK-03 checkIn occupies the slot and opens an ACTIVE session" time="0.000161" classname="test" file="tests/wb-overstay-parking.test.js"/>
+	<testcase name="WB-PRK-04 checkIn frees the slot again when the session cannot be saved" time="0.002253" classname="test" file="tests/wb-overstay-parking.test.js"/>
+	<testcase name="WB-PRK-05 completeSession frees the slot only when a session was active" time="0.000521" classname="test" file="tests/wb-overstay-parking.test.js"/>
+	<testcase name="WB-PRK-06 subscription check-in covers no pass, already in, slot taken, success and rollback" time="0.001044" classname="test" file="tests/wb-overstay-parking.test.js"/>
+	<testcase name="WB-PRK-07 subscription check-out needs an active session and frees the slot" time="0.000584" classname="test" file="tests/wb-overstay-parking.test.js"/>
+	<testcase name="WB-PRK-08 vehicle tracking: missing number, unknown vehicle, parked and not parked" time="0.001237" classname="test" file="tests/wb-overstay-parking.test.js"/>
+	<testcase name="WB-PAY-01 an unknown payment method is refused before anything is read" time="0.001003" classname="test" file="tests/wb-payment-subscription.test.js"/>
+	<testcase name="WB-PAY-02 paying for someone else's or an unknown booking fails" time="0.000378" classname="test" file="tests/wb-payment-subscription.test.js"/>
+	<testcase name="WB-PAY-03 a booking that is already paid returns the earlier payment (no double charge)" time="0.000277" classname="test" file="tests/wb-payment-subscription.test.js"/>
+	<testcase name="WB-PAY-04 only confirmed bookings can be paid" time="0.000222" classname="test" file="tests/wb-payment-subscription.test.js"/>
+	<testcase name="WB-PAY-05 a successful payment charges each started hour and sends a payment alert" time="0.002763" classname="test" file="tests/wb-payment-subscription.test.js"/>
+	<testcase name="WB-PAY-06 a gateway failure records a FAILED payment and tells the user" time="0.000420" classname="test" file="tests/wb-payment-subscription.test.js"/>
+	<testcase name="WB-PAY-07 two payments racing for one booking: the duplicate-key loser returns the winner's payment" time="0.000292" classname="test" file="tests/wb-payment-subscription.test.js"/>
+	<testcase name="WB-PAY-08 fines: unknown fine, already paid, and not checked out yet are refused" time="0.000481" classname="test" file="tests/wb-payment-subscription.test.js"/>
+	<testcase name="WB-PAY-09 a fine whose payment already went through is marked PAID without charging again" time="0.000163" classname="test" file="tests/wb-payment-subscription.test.js"/>
+	<testcase name="WB-PAY-10 paying a fine after checkout charges the fine amount and marks it PAID" time="0.000223" classname="test" file="tests/wb-payment-subscription.test.js"/>
+	<testcase name="WB-PAY-11 fine payment races: duplicate key returns the saved payment, other errors propagate" time="0.000768" classname="test" file="tests/wb-payment-subscription.test.js"/>
+	<testcase name="WB-PAY-12 subscription payment checks amount and period (boundary values 0, -1, NaN)" time="0.000229" classname="test" file="tests/wb-payment-subscription.test.js"/>
+	<testcase name="WB-PAY-13 subscription payment: retry returns the saved payment, new period charges once" time="0.000255" classname="test" file="tests/wb-payment-subscription.test.js"/>
+	<testcase name="WB-PAY-14 subscription payment error: recovers a saved payment, otherwise rethrows" time="0.000324" classname="test" file="tests/wb-payment-subscription.test.js"/>
+	<testcase name="WB-PAY-15 transaction history is the user's payments, newest first" time="0.000144" classname="test" file="tests/wb-payment-subscription.test.js"/>
+	<testcase name="WB-SUB-01 buying a pass: vehicle and slot must exist, be free, fit, and not be booked" time="0.004394" classname="test" file="tests/wb-payment-subscription.test.js"/>
+	<testcase name="WB-SUB-02 buying a pass activates it once the payment succeeds" time="0.000352" classname="test" file="tests/wb-payment-subscription.test.js"/>
+	<testcase name="WB-SUB-03 a failed pass payment marks it PAYMENT_FAILED and releases the slot lock" time="0.000274" classname="test" file="tests/wb-payment-subscription.test.js"/>
+	<testcase name="WB-SUB-04 renewing: unknown or inactive passes are refused; an active one extends by a month" time="0.001088" classname="test" file="tests/wb-payment-subscription.test.js"/>
+	<testcase name="WB-SUB-05 stopping renewal: not found, not active, already stopped, then success" time="0.000483" classname="test" file="tests/wb-payment-subscription.test.js"/>
+	<testcase name="WB-SUB-06 listing my passes expires old ones first and sorts newest first" time="0.000127" classname="test" file="tests/wb-payment-subscription.test.js"/>
+	<testcase name="WB-VEH-01 registration rejects non-numeric sizes and stores the owner when signed in" time="0.050419" classname="test" file="tests/wb-vehicle-slot-auth.test.js"/>
+	<testcase name="WB-VEH-02 getVehicle finds by upper-case number or reports not found" time="0.000618" classname="test" file="tests/wb-vehicle-slot-auth.test.js"/>
+	<testcase name="WB-VEH-03 QR pass: unknown vehicle, old record gets a token, existing token is reused" time="0.080407" classname="test" file="tests/wb-vehicle-slot-auth.test.js"/>
+	<testcase name="WB-VEH-04 QR scan: missing or wrong token is refused, a valid one returns the vehicle without the token" time="0.000328" classname="test" file="tests/wb-vehicle-slot-auth.test.js"/>
+	<testcase name="WB-VEH-05 ownership: admin sees all; owner yes; other student no; unowned or unknown vehicles stay open" time="0.000271" classname="test" file="tests/wb-vehicle-slot-auth.test.js"/>
+	<testcase name="WB-VEH-06 my vehicles are filtered by owner, newest first" time="0.000115" classname="test" file="tests/wb-vehicle-slot-auth.test.js"/>
+	<testcase name="WB-SLT-01 createSlot: missing fields, non-numeric sizes, duplicate number, and success" time="0.000197" classname="test" file="tests/wb-vehicle-slot-auth.test.js"/>
+	<testcase name="WB-SLT-02 getSlots filters by an upper-cased status only when one is given" time="0.000112" classname="test" file="tests/wb-vehicle-slot-auth.test.js"/>
 	<testcase name="WB-SLT-03 recommendSlot reports an unknown vehicle with status 404" time="0.000120" classname="test" file="tests/wb-vehicle-slot-auth.test.js"/>
-	<testcase name="WB-RES-01 createReservation input checks: bad ids, bad times, end before start, start in the past" time="0.000253" classname="test" file="tests/wb-vehicle-slot-auth.test.js"/>
-	<testcase name="WB-RES-04 booking lock: waits while the slot is busy, then books and releases the lock" time="0.049636" classname="test" file="tests/wb-vehicle-slot-auth.test.js"/>
-	<testcase name="WB-RES-05 booking lock is released even when the slot turns out to be taken" time="0.000361" classname="test" file="tests/wb-vehicle-slot-auth.test.js"/>
-	<testcase name="WB-RES-06 booking lock gives up with a clear message when the slot stays busy" time="0.073006" classname="test" file="tests/wb-vehicle-slot-auth.test.js"/>
-	<testcase name="WB-RES-02 cancel: not found, already cancelled, already started, and success" time="0.000495" classname="test" file="tests/wb-vehicle-slot-auth.test.js"/>
-	<testcase name="WB-RES-03 my reservations are sorted by start time" time="0.000111" classname="test" file="tests/wb-vehicle-slot-auth.test.js"/>
-	<testcase name="WB-NTF-01 alerts are listed newest first and only the owner can mark one read" time="0.000155" classname="test" file="tests/wb-vehicle-slot-auth.test.js"/>
-	<testcase name="WB-AUT-01 register input checks: name, email format and password length boundaries (7, 8, 72, 73)" time="0.138716" classname="test" file="tests/wb-vehicle-slot-auth.test.js"/>
-	<testcase name="WB-AUT-02 login: missing fields and an unknown email give the same generic answer" time="0.000321" classname="test" file="tests/wb-vehicle-slot-auth.test.js"/>
-	<testcase name="WB-AUT-03 getUser returns the public profile or 404" time="0.000146" classname="test" file="tests/wb-vehicle-slot-auth.test.js"/>
-	<testcase name="WB-AUT-04 ensureAdmin: no settings, creates once, leaves an existing admin, never promotes a student" time="0.061047" classname="test" file="tests/wb-vehicle-slot-auth.test.js"/>
-	<testcase name="WB-AUT-05 a token signed with another secret, or expired, is rejected" time="0.001150" classname="test" file="tests/wb-vehicle-slot-auth.test.js"/>
+	<testcase name="WB-RES-01 createReservation input checks: bad ids, bad times, end before start, start in the past" time="0.000260" classname="test" file="tests/wb-vehicle-slot-auth.test.js"/>
+	<testcase name="WB-RES-04 booking lock: waits while the slot is busy, then books and releases the lock" time="0.039588" classname="test" file="tests/wb-vehicle-slot-auth.test.js"/>
+	<testcase name="WB-RES-05 booking lock is released even when the slot turns out to be taken" time="0.000338" classname="test" file="tests/wb-vehicle-slot-auth.test.js"/>
+	<testcase name="WB-RES-06 booking lock gives up with a clear message when the slot stays busy" time="0.059630" classname="test" file="tests/wb-vehicle-slot-auth.test.js"/>
+	<testcase name="WB-RES-02 cancel: not found, already cancelled, already started, and success" time="0.000341" classname="test" file="tests/wb-vehicle-slot-auth.test.js"/>
+	<testcase name="WB-RES-03 my reservations are sorted by start time" time="0.000108" classname="test" file="tests/wb-vehicle-slot-auth.test.js"/>
+	<testcase name="WB-NTF-01 alerts are listed newest first and only the owner can mark one read" time="0.000161" classname="test" file="tests/wb-vehicle-slot-auth.test.js"/>
+	<testcase name="WB-AUT-01 register input checks: name, email format and password length boundaries (7, 8, 72, 73)" time="0.137525" classname="test" file="tests/wb-vehicle-slot-auth.test.js"/>
+	<testcase name="WB-AUT-02 login: missing fields and an unknown email give the same generic answer" time="0.000285" classname="test" file="tests/wb-vehicle-slot-auth.test.js"/>
+	<testcase name="WB-AUT-03 getUser returns the public profile or 404" time="0.000141" classname="test" file="tests/wb-vehicle-slot-auth.test.js"/>
+	<testcase name="WB-AUT-04 ensureAdmin: no settings, creates once, leaves an existing admin, never promotes a student" time="0.059875" classname="test" file="tests/wb-vehicle-slot-auth.test.js"/>
+	<testcase name="WB-AUT-05 a token signed with another secret, or expired, is rejected" time="0.001050" classname="test" file="tests/wb-vehicle-slot-auth.test.js"/>
 	<!-- tests 164 -->
 	<!-- suites 0 -->
 	<!-- pass 164 -->
@@ -171,5 +171,5 @@
 	<!-- cancelled 0 -->
 	<!-- skipped 0 -->
 	<!-- todo 0 -->
-	<!-- duration_ms 1113.519541 -->
+	<!-- duration_ms 1107.656625 -->
 </testsuites>

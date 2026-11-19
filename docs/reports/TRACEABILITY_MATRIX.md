@@ -1,6 +1,6 @@
 # Requirements Traceability Matrix
 
-G10 Vehicle Parking System · generated on 2026-11-18 from commit `d51b8d5`.
+G10 Vehicle Parking System · generated on 2026-11-18 from commit `cdcd871`.
 
 This matrix links each requirement in the Software Test Plan (section 3, VPS-F/VPS-NF ids) and the features added later (FR-8, FR-9) to the tests that verify it. "Status" is the result of the black-box run in this report.
 

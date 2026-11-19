@@ -1,6 +1,6 @@
 # White-Box Test Report
 
-G10 Vehicle Parking System · generated on 2026-11-18 from commit `d51b8d5`.
+G10 Vehicle Parking System · generated on 2026-11-18 from commit `cdcd871`.
 
 ## 1. Purpose and approach
 
@@ -25,8 +25,8 @@ Techniques used:
 | Unit test cases | **164** in 14 files |
 | Passed | **164** |
 | Failed | **0** |
-| Run time | 1.4 s |
-| Statement coverage (unit only) | **89.1%** |
+| Run time | 1.7 s |
+| Statement coverage (unit only) | **89.0%** |
 | Branch coverage (unit only) | **95.1%** |
 | Function coverage (unit only) | **91.4%** |
 
@@ -308,7 +308,7 @@ Cyclomatic complexity V(G) = decisions + 1 gives the number of independent paths
 | Item | Value |
 |---|---|
 | Date of run | 2026-11-18 |
-| Code version | `d51b8d5` on branch `docs/test-reports` |
+| Code version | `cdcd871` on branch `docs/sprint3-final` |
 | Runtime | Node.js v24.19.0 on Darwin 25.4.0 (arm64) |
 | Database | MongoDB 9.0.2 (a fresh test database for each run) |
 | Unit test runner | Node.js built-in test runner (`node:test`), database models stubbed |
