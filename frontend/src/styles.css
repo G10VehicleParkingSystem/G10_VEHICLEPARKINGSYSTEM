@@ -511,6 +511,43 @@ table.table {
   .topbar-right { margin-left: auto; }
 }
 
+/* ---------- Gate check ---------- */
+
+.gate-camera video {
+  width: 100%;
+  max-height: 340px;
+  border-radius: var(--radius);
+  background: var(--navy-900);
+  object-fit: cover;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.gate-result {
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  border-left: 6px solid var(--ok);
+  background: var(--ok-bg);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.gate-result.bad { border-left-color: var(--bad); background: var(--bad-bg); }
+.gate-result strong:first-child { font-size: 17px; }
+.gate-vehicle { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+/* ---------- Slot ratings ---------- */
+
+.slot-cell .slot-rating { font-size: 12px; color: var(--muted); }
+.slot-cell .slot-rating .stars { font-size: 12px; }
+
+.review-list { display: flex; flex-direction: column; gap: 12px; }
+.review-item { border-top: 1px solid var(--line-soft); padding-top: 10px; }
+.review-item:first-child { border-top: 0; padding-top: 0; }
+.review-item p { margin-top: 4px; }
+
 /* ---------- Sign in / register ---------- */
 
 .auth {

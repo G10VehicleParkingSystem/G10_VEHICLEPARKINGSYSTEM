@@ -14,7 +14,8 @@ const STUDENT_LINKS = [
 
 const OFFICE_LINKS = [
   { to: "/office", label: "Overview", end: true },
-  { to: "/office/slots", label: "Slots" }
+  { to: "/office/slots", label: "Slots" },
+  { to: "/office/gate", label: "Gate check" }
 ];
 
 function AlertsLink({ userId }) {
