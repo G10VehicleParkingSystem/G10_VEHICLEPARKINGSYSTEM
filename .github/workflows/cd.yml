@@ -120,6 +120,9 @@ jobs:
         uses: actions/checkout@v7
         with:
           ref: ${{ env.RELEASE_SHA }}
+          # Full history, so the wait step can tell whether a newer live commit
+          # already contains this release.
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
@@ -176,9 +179,19 @@ jobs:
               echo "Release ${RELEASE_SHA::7} is live."
               exit 0
             fi
+            # Render always deploys the newest commit on main. If two pull requests
+            # were merged close together, the live site may already run a newer
+            # commit that includes this release, which is just as good.
+            if [ -n "$live" ] && [ "$live" != "dev" ]; then
+              git cat-file -e "${live}^{commit}" 2>/dev/null || git fetch -q origin main
+              if git merge-base --is-ancestor "$RELEASE_SHA" "$live" 2>/dev/null; then
+                echo "The live site runs ${live::7}, a newer commit that includes release ${RELEASE_SHA::7}."
+                exit 0
+              fi
+            fi
             sleep 15
           done
-          echo "The live site did not switch to ${RELEASE_SHA::7} within 15 minutes. Check the Render deploy log."
+          echo "The live site did not switch to ${RELEASE_SHA::7} (or a newer commit) within 15 minutes. Check the Render deploy log."
           exit 1
 
       # Read-only: signs in as the office and checks roles and reports, but creates no
